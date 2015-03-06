@@ -76,10 +76,10 @@ void main(void)
 	newplanet->next = NULL;*/
 
 	strcpy_s(newplanet->name, sizeof(newplanet->name), "Orvar");
-	newplanet->sx = 300;											
-	newplanet->sy = 300;											
-	newplanet->vx = 0;											
-	newplanet->vy = 0;											
+	newplanet->sx = 300;	
+	newplanet->sy = 300;
+	newplanet->vx = 0;
+	newplanet->vy = 0;
 	newplanet->mass = 100000000;											
 	newplanet->life = 37737383;
 	newplanet->next = NULL;
