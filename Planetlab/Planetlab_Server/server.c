@@ -9,7 +9,7 @@
 * Based on generic.c from Microsoft.                                 *
 *                                                                    *
 *  Functions:                                                        *
-*     WinMain      - Application entry point                         *
+*     WinMain      - Application entry point     bla bla                     *
 *     MainWndProc  - main window procedure                           *
 *                                                                    *
 * NOTE: this program uses some graphic primitives provided by Win32, *
