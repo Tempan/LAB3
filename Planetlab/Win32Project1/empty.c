@@ -12,17 +12,17 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 	hDlg = CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_DIALOG1), 0, DialogProc, 0);
 	ShowWindow(hDlg, nCmdShow);
 
-  while((ret = GetMessage(&msg, 0, 0, 0)) != 0) 
-  {
-    if(ret == -1)
-      return -1;
-
-    if(!IsDialogMessage(hDlg, &msg)) 
+	while((ret = GetMessage(&msg, 0, 0, 0)) != 0) 
 	{
-      TranslateMessage(&msg);
-      DispatchMessage(&msg);
-    }
-  }
+		if(ret == -1)
+			return -1;
+
+		if(!IsDialogMessage(hDlg, &msg)) 
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+	}
 
 
 
@@ -33,5 +33,5 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 }
 INT_PTR CALLBACK DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-  return FALSE;
+	return FALSE;
 }
