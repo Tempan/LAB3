@@ -15,7 +15,7 @@ HINSTANCE hInst;
 LPTSTR Slot = TEXT("\\\\.\\mailslot\\mailslot_fromForm");
 HWND dia1, dia2;
 HANDLE mailSlot;
-
+void AddPlanets();
 
 //Första dialogrutans funktioner... (DIALOG2)
 INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -90,10 +90,6 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 //Andra dialogrutans funktioner... (DIALOG1)
 INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
-	DWORD bytesWritten;
-	Sleep(2000);
-	mailSlot = mailslotConnect(Slot);
 	switch(uMsg)
 	{
 	case WM_COMMAND:
@@ -108,61 +104,7 @@ INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			return FALSE;
 
 		case btn_addPlanet:
-			LengthOfName = GetWindowTextLength(GetDlgItem(dia1, txt_name));
-			LengthOfX = GetWindowTextLength(GetDlgItem(dia1, txt_posx));
-			LengthOfY = GetWindowTextLength(GetDlgItem(dia1, txt_posY));
-			LengthOfVX = GetWindowTextLength(GetDlgItem(dia1, txt_VX));
-			LengthOfVY = GetWindowTextLength(GetDlgItem(dia1, txt_VY));
-			LengthOfMass = GetWindowTextLength(GetDlgItem(dia1, txt_mass));
-			lengthOfLife = GetWindowTextLength(GetDlgItem(dia1, txt_life));
-
-			if (LengthOfName > 0 && LengthOfX > 0 && LengthOfY > 0 && 
-				LengthOfVX > 0 && LengthOfVY > 0 && LengthOfMass > 0 && lengthOfLife > 0  )
-			{
-				char *buf;
-
-				buf = (char*)GlobalAlloc(GPTR, LengthOfName + 1);
-				GetDlgItemText(dia1, txt_name, buf, LengthOfName + 1);
-				strcpy_s(name, sizeof(buf), buf);
-
-				buf = (char*)GlobalAlloc(GPTR, LengthOfX + 1);
-				GetDlgItemText(dia1, txt_posx, buf, LengthOfX + 1);
-				_sx = atof(buf);
-
-				buf = (char*)GlobalAlloc(GPTR, LengthOfY + 1);
-				GetDlgItemText(dia1, txt_posY, buf, LengthOfY + 1);
-				_sy = atof(buf);
-
-				buf = (char*)GlobalAlloc(GPTR, LengthOfVX + 1);
-				GetDlgItemText(dia1, txt_VX, buf, LengthOfVX + 1);
-				_vx = atof(buf);
-
-				buf = (char*)GlobalAlloc(GPTR, LengthOfVY + 1);
-				GetDlgItemText(dia1, txt_VY, buf, LengthOfVY + 1);
-				_vy = atof(buf);
-
-				buf = (char*)GlobalAlloc(GPTR, LengthOfMass + 1);
-				GetDlgItemText(dia1, txt_mass, buf, LengthOfMass + 1);
-				_mass = atof(buf);
-
-				buf = (char*)GlobalAlloc(GPTR, lengthOfLife + 1);
-				GetDlgItemText(dia1, txt_life, buf, lengthOfLife + 1);
-				_life = atof(buf);
-
-				GlobalFree((HANDLE)buf);
-			}
-			else 
-				SetDlgItemText(dia1, txt_name, "Something was missing!");//Något fält är inte i ifyllt
-			
-			strcpy_s(newplanet->name, sizeof(newplanet->name), name);
-			newplanet->sx = _sx;										
-			newplanet->sy = _sy;											
-			newplanet->vx = _vy;											
-			newplanet->vy = _vx;											
-			newplanet->mass = _mass;											
-			newplanet->life = _life;
-			newplanet->next = NULL;
-			sprintf_s(newplanet->pid,15, "%lu", GetCurrentProcessId());
+			AddPlanets();
 			break;
 		}
 		break;
@@ -171,8 +113,6 @@ INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	return FALSE;
 }
-
-
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow ) 
 {
@@ -202,11 +142,68 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 			DispatchMessage(&msg);
 		}
 	}
-
-
-
-
-
-
 	return 1;
+}
+
+void AddPlanets()
+{
+	struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
+	DWORD bytesWritten;
+	mailSlot = mailslotConnect(Slot);
+	LengthOfName = GetWindowTextLength(GetDlgItem(dia1, txt_name));
+	LengthOfX = GetWindowTextLength(GetDlgItem(dia1, txt_posx));
+	LengthOfY = GetWindowTextLength(GetDlgItem(dia1, txt_posY));
+	LengthOfVX = GetWindowTextLength(GetDlgItem(dia1, txt_VX));
+	LengthOfVY = GetWindowTextLength(GetDlgItem(dia1, txt_VY));
+	LengthOfMass = GetWindowTextLength(GetDlgItem(dia1, txt_mass));
+	lengthOfLife = GetWindowTextLength(GetDlgItem(dia1, txt_life));
+
+	if (LengthOfName > 0 && LengthOfX > 0 && LengthOfY > 0 && 
+		LengthOfVX > 0 && LengthOfVY > 0 && LengthOfMass > 0 && lengthOfLife > 0  )
+	{
+		char *buf;
+
+		buf = (char*)GlobalAlloc(GPTR, LengthOfName + 1);
+		GetDlgItemText(dia1, txt_name, buf, LengthOfName + 1);
+		strcpy_s(name, sizeof(buf), buf);
+
+		buf = (char*)GlobalAlloc(GPTR, LengthOfX + 1);
+		GetDlgItemText(dia1, txt_posx, buf, LengthOfX + 1);
+		_sx = atof(buf);
+
+		buf = (char*)GlobalAlloc(GPTR, LengthOfY + 1);
+		GetDlgItemText(dia1, txt_posY, buf, LengthOfY + 1);
+		_sy = atof(buf);
+
+		buf = (char*)GlobalAlloc(GPTR, LengthOfVX + 1);
+		GetDlgItemText(dia1, txt_VX, buf, LengthOfVX + 1);
+		_vx = atof(buf);
+
+		buf = (char*)GlobalAlloc(GPTR, LengthOfVY + 1);
+		GetDlgItemText(dia1, txt_VY, buf, LengthOfVY + 1);
+		_vy = atof(buf);
+
+		buf = (char*)GlobalAlloc(GPTR, LengthOfMass + 1);
+		GetDlgItemText(dia1, txt_mass, buf, LengthOfMass + 1);
+		_mass = atof(buf);
+
+		buf = (char*)GlobalAlloc(GPTR, lengthOfLife + 1);
+		GetDlgItemText(dia1, txt_life, buf, lengthOfLife + 1);
+		_life = atof(buf);
+
+		GlobalFree((HANDLE)buf);
+	}
+	else 
+		SetDlgItemText(dia1, txt_name, "Something was missing!");//Något fält är inte ifyllt
+
+	strcpy_s(newplanet->name, sizeof(newplanet->name), name);
+	newplanet->sx = _sx;										
+	newplanet->sy = _sy;											
+	newplanet->vx = _vy;											
+	newplanet->vy = _vx;											
+	newplanet->mass = _mass;											
+	newplanet->life = _life;
+	newplanet->next = NULL;
+	sprintf_s(newplanet->pid,15, "%lu", GetCurrentProcessId());
+	bytesWritten = mailslotWrite (mailSlot, (void*)newplanet, sizeof(struct pt));
 }
