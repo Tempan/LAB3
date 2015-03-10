@@ -99,7 +99,7 @@ void main(void)
 	while(1)
 	{
 	}
-	mailslotClose (mailSlot);
+	mailslotClose(mailSlot);
 	return;
 }
 
