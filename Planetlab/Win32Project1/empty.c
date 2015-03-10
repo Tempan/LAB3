@@ -82,8 +82,6 @@ INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			return FALSE;
 		case btn_addPlanet:
 			
-			name = GetDlgItemText(dia1, txt_name, buff, 1024);
-			SetDlgItemInt(dia1, box_planetList, name, TRUE);
 			break;
 		}
 		break;
