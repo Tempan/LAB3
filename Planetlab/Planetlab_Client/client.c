@@ -41,27 +41,21 @@ void main(void)
 
 	/*printf("Name of planet");
 	gets_s(newplanet->name,sizeof(newplanet->name));
-
 	printf("x-position");
 	fgets(message, sizeof (message), stdin);
 	sscanf_s(message, "%lf", &_sx);
-
 	printf("y-position");
 	fgets(message, sizeof (message), stdin);
 	sscanf_s(message, "%lf", &_sy);
-
 	printf("x-velocity");
 	fgets(message, sizeof (message), stdin);
 	sscanf_s(message, "%lf", &_vx);
-
 	printf("y-velocity");
 	fgets(message, sizeof (message), stdin);
 	sscanf_s(message, "%lf", &_vy);
-
 	printf("planet mass");
 	fgets(message, sizeof (message), stdin);
 	sscanf_s(message, "%lf", &_mass);
-
 	printf("planet life");
 	fgets(message, sizeof (message), stdin);
 	sscanf_s(message, "%lf", &_life);*/
@@ -115,7 +109,6 @@ void main(void)
 
 DWORD WINAPI threadRead( LPVOID lpParam ) // read if planet is dead
 {
-	//struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
 	char theMessage[200];
 	HANDLE mailSlot;
 	mailSlot = mailslotCreate("\\\\.\\mailslot\\test");
