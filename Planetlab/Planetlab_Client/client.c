@@ -73,6 +73,7 @@ void main(void)
 	newplanet->mass = 100000000;											
 	newplanet->life = 37737383;
 	newplanet->next = NULL;
+	sprintf_s(newplanet->pid,15, "%lu", GetCurrentProcessId());
 
 	bytesWritten = mailslotWrite (mailSlot, (void*)newplanet, sizeof(struct pt));
 
@@ -89,6 +90,7 @@ void main(void)
 	newplanet->mass = 1000;											
 	newplanet->life = 37737388;
 	newplanet->next = NULL;
+	sprintf_s(newplanet->pid,15, "%lu", GetCurrentProcessId());
 
 	bytesWritten = mailslotWrite (mailSlot, (void*)newplanet, sizeof(struct pt));
 
@@ -99,15 +101,22 @@ void main(void)
 	while(1)
 	{
 	}
-	mailslotClose (mailSlot);
+	mailslotClose(mailSlot);
 	return;
 }
 
-DWORD WINAPI threadRead( LPVOID lpParam ) // read if planet is dead
+DWORD WINAPI threadRead( void* data ) // read if planet is dead
 {
+	char id[20];
 	char theMessage[200];
 	HANDLE mailSlot;
-	mailSlot = mailslotCreate("\\\\.\\mailslot\\test");
+	LPTSTR Slot; 
+	char slot[40];
+	strcpy_s(slot, sizeof(slot), "\\\\.\\mailslot\\test");
+	sprintf_s(id,sizeof(id), "%d", data);
+	strcat_s(slot,sizeof(slot),id);
+	Slot = slot;
+	mailSlot = mailslotCreate(Slot);
 	while (1)
 	{
 		int bytesread = mailslotRead(mailSlot, theMessage, 424);
