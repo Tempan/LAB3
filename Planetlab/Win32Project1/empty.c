@@ -5,8 +5,9 @@
 #include "wrapper.h"
 
 HINSTANCE hInst;
-
 HWND dia1, dia2;
+CHAR buff[1024];
+UINT name; 
 
 //Första dialogrutans funktioner... (DIALOG2)
 INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -22,7 +23,8 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch(LOWORD(wParam))
 		{
 		case btn_exit:
-			DestroyWindow(hDlg);
+			DestroyWindow(dia1);
+			DestroyWindow(dia2);
 			//SendMessage(hDlg, WM_CLOSE, 0, 0);
 			return TRUE;
 
@@ -79,6 +81,9 @@ INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			ShowWindow(dia1, 1);
 			return FALSE;
 		case btn_addPlanet:
+			
+			name = GetDlgItemText(dia1, txt_name, buff, 1024);
+			SetDlgItemInt(dia1, box_planetList, name, TRUE);
 			break;
 		}
 		break;
