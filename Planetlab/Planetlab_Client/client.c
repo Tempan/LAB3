@@ -30,11 +30,6 @@ void main(void)
 	/* NOTE: replace code below for sending planet data to the server. */
 	threadCreate(threadRead, 0);
 	Sleep(2002);
-	
-	/* send a friendly greeting to the server
-	NOTE: The messages sent to the server need not to be of equal size.
-	Messages can be of different sizes as long as they don't exceed the
-	maximum message size that the mailslot can handle (defined upon creation).*/
 
 	/*printf("Name of planet");
 	gets_s(newplanet->name,sizeof(newplanet->name));
