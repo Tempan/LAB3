@@ -5,14 +5,19 @@
 #include "wrapper.h"
 
 HINSTANCE hInst;
-
+LPTSTR Slot = TEXT("\\\\.\\mailslot\\mailslot_fromForm");
 HWND dia1, dia2;
+HANDLE mailSlot;
 
 //Första dialogrutans funktioner... (DIALOG2)
 INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	double _sx, _sy, _vx, _vy, _mass, _life;
+	struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
+	double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
 	char planetName[100];
+	Sleep(2000);
+	mailSlot = mailslotConnect(Slot); 
+
 	//FILE *fp;
 	//char buff[255];
 	//fp = fopen_s(&fp, "/tmp/test.txt", "r");
@@ -41,6 +46,15 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//	break;
 		case btn_SendToServer:
 			//Send planets to server
+
+			gets_s(newplanet->name,sizeof(newplanet->name));
+			newplanet->sx = _sx;										
+			newplanet->sy = _sy;											
+			newplanet->vx = _vy;											
+			newplanet->vy = _vx;											
+			newplanet->mass = _mass;											
+			newplanet->life = _life;
+			newplanet->next = NULL;
 			;
 		case btn_SaveInFile:
 
@@ -59,7 +73,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		PostQuitMessage(0);
 		return TRUE;*/
 	}
-
+	mailslotClose (mailSlot);
 	return FALSE;
 }
 
@@ -82,13 +96,9 @@ INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		break;
-
 	}
-
 	return FALSE;
 }
-
-
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow ) 
 {
@@ -99,30 +109,20 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 	//öppnar DIALOG1
 	dia1 = CreateDialogParam(hInstance, MAKEINTRESOURCE(DIALOG1), 0, DialogProc1, 0);
 	hInst = hInstance;
-
-
 	//öppnar DIALOG2
 	dia2 = CreateDialogParam(hInstance, MAKEINTRESOURCE(DIALOG2), 0, DialogProc2, 0);
 	hInst = hInstance;
 	ShowWindow(dia2, nCmdShow);
 
-
 	while((ret = GetMessage(&msg, 0, 0, 0)) != 0) 
 	{
 		if(ret == -1)
 			return -1;
-
 		if(!IsDialogMessage(dia2, &msg)) 
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
 	}
-
-
-
-
-
-
 	return 1;
 }
