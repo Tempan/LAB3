@@ -14,7 +14,6 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
 	double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
-	char planetName[100];
 	Sleep(2000);
 	mailSlot = mailslotConnect(Slot); 
 
