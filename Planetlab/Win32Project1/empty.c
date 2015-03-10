@@ -23,8 +23,8 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	/*struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
 	DWORD bytesWritten;
 	Sleep(2000);
-	mailSlot = mailslotConnect(Slot); 
-*/
+	mailSlot = mailslotConnect(Slot); */
+
 	//FILE *fp;
 	//char buff[255];
 	//fp = fopen_s(&fp, "/tmp/test.txt", "r");
@@ -90,6 +90,10 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 //Andra dialogrutans funktioner... (DIALOG1)
 INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
+	DWORD bytesWritten;
+	Sleep(2000);
+	mailSlot = mailslotConnect(Slot);
 	switch(uMsg)
 	{
 	case WM_COMMAND:
@@ -118,8 +122,8 @@ INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 				buf = (char*)GlobalAlloc(GPTR, LengthOfName + 1);
 				GetDlgItemText(dia1, txt_name, buf, LengthOfName + 1);
-				strcpy_s(buf, sizeof(buf), name);
-				
+				strcpy_s(name, sizeof(buf), buf);
+
 				buf = (char*)GlobalAlloc(GPTR, LengthOfX + 1);
 				GetDlgItemText(dia1, txt_posx, buf, LengthOfX + 1);
 				_sx = atof(buf);
@@ -131,11 +135,11 @@ INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				buf = (char*)GlobalAlloc(GPTR, LengthOfVX + 1);
 				GetDlgItemText(dia1, txt_VX, buf, LengthOfVX + 1);
 				_vx = atof(buf);
-				
+
 				buf = (char*)GlobalAlloc(GPTR, LengthOfVY + 1);
 				GetDlgItemText(dia1, txt_VY, buf, LengthOfVY + 1);
 				_vy = atof(buf);
-				
+
 				buf = (char*)GlobalAlloc(GPTR, LengthOfMass + 1);
 				GetDlgItemText(dia1, txt_mass, buf, LengthOfMass + 1);
 				_mass = atof(buf);
@@ -148,12 +152,17 @@ INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			}
 			else 
-				//Något fält är inte i ifyllt
-
-				//name = GetDlgItemText(dia1, txt_name, buff, 1024);
-
-				//SetDlgItemInt(dia1, box_planetList, name, TRUE);
-				break;
+				SetDlgItemText(dia1, txt_name, "Something was missing!");//Något fält är inte i ifyllt
+			
+			strcpy_s(newplanet->name, sizeof(newplanet->name), name);
+			newplanet->sx = _sx;										
+			newplanet->sy = _sy;											
+			newplanet->vx = _vy;											
+			newplanet->vy = _vx;											
+			newplanet->mass = _mass;											
+			newplanet->life = _life;
+			newplanet->next = NULL;
+			break;
 		}
 		break;
 
