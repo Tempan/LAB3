@@ -6,9 +6,6 @@ HINSTANCE hInst;
 
 HWND dia1, dia2;
 
-
-
-
 //Första dialogrutans funktioner... (DIALOG2)
 INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
