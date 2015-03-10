@@ -2,6 +2,8 @@
 #include "resource.h"
 #include <tchar.h>
 #include <stdio.h>
+#include "wrapper.h"
+
 HINSTANCE hInst;
 
 HWND dia1, dia2;
