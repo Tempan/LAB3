@@ -41,34 +41,10 @@ void createPlanet(char*, double, double, double, double, double, int);
 void* updatePlanets(void* planeten);
 void removePlanets(struct pt* planeten);
 
-/*********************  Prototypes  ***************************/
-/* NOTE: Windows has defined its own set of types. When the   */
-/*       types are of importance to you we will write comments*/ 
-/*       to indicate that. (Ignore them for now.)             */
-/**************************************************************/
-
 LRESULT WINAPI MainWndProc( HWND, UINT, WPARAM, LPARAM );
 DWORD WINAPI mailThread(LPVOID);
 
-
-
-HDC hDC;		/* Handle to Device Context, gets set 1st time in MainWndProc */
-/* we need it to access the window for printing and drawin */
-
-/********************************************************************\
-*  Function: int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)    *
-*                                                                    *
-*   Purpose: Initializes Application                                 *
-*                                                                    *
-*  Comments: Register window class, create and display the main      *
-*            window, and enter message loop.                         *
-*                                                                    *
-*                                                                    *
-\********************************************************************/
-
-/* NOTE: This function is not too important to you, it only */
-/*       initializes a bunch of things.                     */
-/* NOTE: In windows WinMain is the start function, not main */
+HDC hDC;	
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow ) {
 	HWND hWnd;
@@ -113,12 +89,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 	return msg.wParam;
 }
 
-
-/********************************************************************\
-* Function: mailThread                                               *
-* Purpose: Handle incoming requests from clients                     *
-* NOTE: This function is important to you.                           *
-/********************************************************************/
 DWORD WINAPI mailThread(LPVOID arg) 
 {
 	char buffer[1024];
@@ -231,6 +201,7 @@ LRESULT CALLBACK MainWndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam 
 	}
 	return 0;
 }
+
 void checkPlanets(struct pt *Testplanet)
 {
 	struct pt* iterator;
@@ -311,6 +282,7 @@ void* updatePlanets(void* planeten) // Ska uppdatera rutan och flytta planeterna
 	mailslotWrite(messages, messageWhyDie, 200);
 	removePlanets(planet);
 }
+
 void removePlanets(struct pt* planeten)
 {
 	struct pt *planet = (struct pt*)planeten;
