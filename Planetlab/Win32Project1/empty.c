@@ -11,9 +11,7 @@ char name[20];
 int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, lengthOfLife;
 double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
 
-HINSTANCE hInst;
 LPTSTR Slot = TEXT("\\\\.\\mailslot\\mailslot_fromForm");
-HWND dia1, dia2;
 HANDLE mailSlot;
 void AddPlanets();
 
