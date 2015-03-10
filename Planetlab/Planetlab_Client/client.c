@@ -22,11 +22,8 @@ void main(void)
 	struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
 	DWORD WINAPI threadRead( LPVOID lpParam );
 	double _sx, _sy, _vx, _vy, _mass, _life;
-	char planetName[100];
-	char message[100000];
 	HANDLE mailSlot;
 	DWORD bytesWritten;
-	int loops = 2000;
 	Sleep(2000);
 	mailSlot = mailslotConnect(Slot); 
 
@@ -34,10 +31,10 @@ void main(void)
 	threadCreate(threadRead, 0);
 	Sleep(2002);
 	
-	/* send a friendly greeting to the server */
-	/* NOTE: The messages sent to the server need not to be of equal size.       */
-	/* Messages can be of different sizes as long as they don't exceed the       */
-	/* maximum message size that the mailslot can handle (defined upon creation).*/
+	/* send a friendly greeting to the server
+	NOTE: The messages sent to the server need not to be of equal size.
+	Messages can be of different sizes as long as they don't exceed the
+	maximum message size that the mailslot can handle (defined upon creation).*/
 
 	/*printf("Name of planet");
 	gets_s(newplanet->name,sizeof(newplanet->name));
@@ -59,7 +56,6 @@ void main(void)
 	printf("planet life");
 	fgets(message, sizeof (message), stdin);
 	sscanf_s(message, "%lf", &_life);*/
-
 
 	/*newplanet->sx = _sx;											
 	newplanet->sy = _sy;											

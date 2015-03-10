@@ -34,7 +34,6 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case btn_createPlanet:
 			ShowWindow(dia1, 1);
 			return FALSE;
-
 			//case btn_start:
 			//	//setWindowText();
 			//	LPCSTR nrplanets;
