@@ -109,7 +109,6 @@ void main(void)
 
 DWORD WINAPI threadRead( LPVOID lpParam ) // read if planet is dead
 {
-	//struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
 	char theMessage[200];
 	HANDLE mailSlot;
 	mailSlot = mailslotCreate("\\\\.\\mailslot\\test");
