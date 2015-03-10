@@ -8,12 +8,21 @@ HINSTANCE hInst;
 HWND dia1, dia2;
 CHAR buff[1024];
 UINT name; 
+HINSTANCE hInst;
+LPTSTR Slot = TEXT("\\\\.\\mailslot\\mailslot_fromForm");
+HWND dia1, dia2;
+HANDLE mailSlot;
+
 
 //Första dialogrutans funktioner... (DIALOG2)
 INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	double _sx, _sy, _vx, _vy, _mass, _life;
-	char planetName[100];
+	struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
+	double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
+	DWORD bytesWritten;
+	Sleep(2000);
+	mailSlot = mailslotConnect(Slot); 
+
 	//FILE *fp;
 	//char buff[255];
 	//fp = fopen_s(&fp, "/tmp/test.txt", "r");
@@ -43,6 +52,17 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//	break;
 		case btn_SendToServer:
 			//Send planets to server
+
+			gets_s(newplanet->name,sizeof(newplanet->name));
+			newplanet->sx = _sx;										
+			newplanet->sy = _sy;											
+			newplanet->vx = _vy;											
+			newplanet->vy = _vx;											
+			newplanet->mass = _mass;											
+			newplanet->life = _life;
+			newplanet->next = NULL;
+
+			bytesWritten = mailslotWrite (mailSlot, (void*)newplanet, sizeof(struct pt));
 			;
 		case btn_SaveInFile:
 
@@ -82,6 +102,8 @@ INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			return FALSE;
 		case btn_addPlanet:
 			
+			name = GetDlgItemText(dia1, txt_name, buff, 1024);
+			SetDlgItemInt(dia1, box_planetList, name, TRUE);
 			break;
 		}
 		break;
