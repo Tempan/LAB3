@@ -149,7 +149,6 @@ INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				_life = atof(buf);
 
 				GlobalFree((HANDLE)buf);
-
 			}
 			else 
 				SetDlgItemText(dia1, txt_name, "Something was missing!");//Något fält är inte i ifyllt
@@ -162,6 +161,7 @@ INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			newplanet->mass = _mass;											
 			newplanet->life = _life;
 			newplanet->next = NULL;
+			sprintf_s(newplanet->pid,15, "%lu", GetCurrentProcessId());
 			break;
 		}
 		break;
