@@ -1,33 +1,8 @@
-/********************************************************************\
-* server.c                                                           *
-*                                                                    *
-* Author: mle@mdh.se                                                 *
-* Desc: example of the server-side of an application                 *
-* Date: 990310                                                       *
-* Revised: 011018 Dag Nyström & Jukka Mäki-Turja                     *
-*                                                                    *
-* Based on generic.c from Microsoft.                                 *
-*                                                                    *
-*  Functions:                                                        *
-*     WinMain      - Application entry point                         *
-*     MainWndProc  - main window procedure                           *
-*                                                                    *
-* NOTE: this program uses some graphic primitives provided by Win32, *
-* therefore there are probably a lot of things that are unfamiliar   *
-* to you. There are comments in this file that indicates where it is *
-* appropriate to place your code.                                    *
-* NOTE: you will stumble into some problems if you run this program  *
-*       in Windows 95/98. don't do that, use NT instead.             *
-\********************************************************************/
-
 #include <windows.h>
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
 #include "wrapper.h"
-
-/* the server uses a timer to periodically update the presentation window */
-/* here is the timer id and timer period defined                          */
 
 #define UPDATE_FREQ     1	/* update frequency (in ms) for the timer */
 #define G 6.67259e-11
