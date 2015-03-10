@@ -20,6 +20,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	//FILE *fp;
 	//char buff[255];
 	//fp = fopen_s(&fp, "/tmp/test.txt", "r");
+
 	switch(uMsg)
 	{
 	case WM_COMMAND:
