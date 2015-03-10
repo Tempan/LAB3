@@ -106,6 +106,7 @@ INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case btn_createPlanet:
 			ShowWindow(dia1, 1);
 			return FALSE;
+
 		case btn_addPlanet:
 			LengthOfName = GetWindowTextLength(GetDlgItem(dia1, txt_name));
 			LengthOfX = GetWindowTextLength(GetDlgItem(dia1, txt_posx));
