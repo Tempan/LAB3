@@ -7,7 +7,11 @@
 HINSTANCE hInst;
 HWND dia1, dia2;
 CHAR buff[1024];
-UINT name; 
+//UINT name; 
+char name[20];
+int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, lengthOfLife;
+double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
+
 HINSTANCE hInst;
 LPTSTR Slot = TEXT("\\\\.\\mailslot\\mailslot_fromForm");
 HWND dia1, dia2;
@@ -18,7 +22,6 @@ HANDLE mailSlot;
 INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
-	double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
 	DWORD bytesWritten;
 	Sleep(2000);
 	mailSlot = mailslotConnect(Slot); 
@@ -101,10 +104,30 @@ INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			ShowWindow(dia1, 1);
 			return FALSE;
 		case btn_addPlanet:
-			
-			name = GetDlgItemText(dia1, txt_name, buff, 1024);
-			SetDlgItemInt(dia1, box_planetList, name, TRUE);
-			break;
+			LengthOfName = GetWindowTextLength(GetDlgItem(dia1, txt_name));
+			LengthOfX = GetWindowTextLength(GetDlgItem(dia1, txt_posx));
+			LengthOfY = GetWindowTextLength(GetDlgItem(dia1, txt_posY));
+			LengthOfVX = GetWindowTextLength(GetDlgItem(dia1, txt_VX));
+			LengthOfVY = GetWindowTextLength(GetDlgItem(dia1, txt_VX));
+			LengthOfMass = GetWindowTextLength(GetDlgItem(dia1, txt_mass));
+			lengthOfLife = GetWindowTextLength(GetDlgItem(dia1, txt_life));
+			if (LengthOfName > 0 && LengthOfX > 0 && LengthOfY > 0 && 
+				LengthOfVX > 0 && LengthOfVY > 0 && LengthOfMass > 0 && lengthOfLife > 0  )
+			{
+				char *buf;
+				buf = (char*)GlobalAlloc(GPTR, LengthOfX + 1);
+				GetDlgItemText(dia1, txt_posx, buf, LengthOfX + 1);
+
+				GlobalFree((HANDLE)buf);
+
+			}
+			else 
+				//Något fält är inte i ifyllt
+
+				//name = GetDlgItemText(dia1, txt_name, buff, 1024);
+
+				//SetDlgItemInt(dia1, box_planetList, name, TRUE);
+				break;
 		}
 		break;
 
