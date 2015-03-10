@@ -41,7 +41,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		case btn_createPlanet:
 			ShowWindow(dia1, 1);
-			return FALSE;
+			break;
 
 			//case btn_start:
 			//	//setWindowText();
@@ -95,13 +95,9 @@ INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		switch(LOWORD(wParam))
 		{
-		case IDCANCEL:
-			DestroyWindow(hDlg);
-			return TRUE;
-
-		case btn_createPlanet:
-			ShowWindow(dia1, 1);
-			return FALSE;
+		case btn_cancel:
+			CloseWindow(hDlg);
+			break;
 
 		case btn_addPlanet:
 			AddPlanets();
