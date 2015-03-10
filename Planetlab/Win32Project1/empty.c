@@ -1,11 +1,14 @@
 #include <windows.h>
 #include "resource.h"
 #include <tchar.h>
-
+#include <string.h>
+#include <stdio.h>
 HINSTANCE hInst;
 
 HWND dia1, dia2;
-
+LPCSTR nrplanets;
+int nrofplanets = 0;
+int index;
 
 
 
@@ -18,7 +21,8 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch(LOWORD(wParam))
 		{
 			case btn_exit:
-					DestroyWindow(hDlg);
+					DestroyWindow(dia2);
+					DestroyWindow(dia1);
 				  //SendMessage(hDlg, WM_CLOSE, 0, 0);
 				  return TRUE;
 
@@ -28,12 +32,15 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			case btn_start:
 				//setWindowText();
-				LPCSTR nrplanets;
-				int nrofplanets = 0;
-				nrplanets = (LPCSTR) nrofplanets;
+				index = SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)"Hi there!");
+				//sprintf_s((char*)nrplanets, sizeof(nrofplanets), "%d", nrofplanets);
+				//nrplanets = (LPCSTR) nrofplanets;
 				//SetWindowText(dia2, "HEJJJJJJJJ!!!!");
-				SetDlgItemText(dia2,TXT_NrOfLocalPlanets, nrofplanets);
+				//SetDlgItemText(dia2,TXT_NrOfLocalPlanets, nrplanets);
 				//UpdateWindow(dia2);
+
+
+
 				break;
 
 		}
