@@ -12,13 +12,15 @@ int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, le
 double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
 
 LPTSTR Slot = TEXT("\\\\.\\mailslot\\sample_mailslot");
-//LPTSTR Slot = TEXT("\\\\.\\mailslot\\mailslot_fromForm");
 HANDLE mailSlot;
 void AddPlanets();
+DWORD WINAPI threadRead( void* data );
 
 //Första dialogrutans funktioner... (DIALOG2)
 INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+
+	mailSlot = mailslotConnect(Slot); 
 	/*struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
 	DWORD bytesWritten;
 	Sleep(2000);
@@ -86,6 +88,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 //Andra dialogrutans funktioner... (DIALOG1)
 INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	mailSlot = mailslotConnect(Slot); 
 	switch(uMsg)
 	{
 	case WM_COMMAND:
@@ -110,8 +113,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 {
 	MSG msg;
 	BOOL ret;
-	//MessageBox(NULL, "It works man?\n", "A cool Mbox", 0);
-	//InitCommonControls();
 	//öppnar DIALOG1
 	dia1 = CreateDialogParam(hInstance, MAKEINTRESOURCE(DIALOG1), 0, DialogProc1, 0);
 	hInst = hInstance;
@@ -122,6 +123,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 	hInst = hInstance;
 	ShowWindow(dia2, nCmdShow);
 
+	threadCreate(threadRead, 0);
 
 	while((ret = GetMessage(&msg, 0, 0, 0)) != 0) 
 	{
@@ -142,6 +144,7 @@ void AddPlanets()
 	struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
 	DWORD bytesWritten;
 	mailSlot = mailslotConnect(Slot);
+	GetWindowText(GetDlgItem(dia1, txt_name), name, sizeof(name));
 	LengthOfName = GetWindowTextLength(GetDlgItem(dia1, txt_name));
 	LengthOfX = GetWindowTextLength(GetDlgItem(dia1, txt_posx));
 	LengthOfY = GetWindowTextLength(GetDlgItem(dia1, txt_posY));
@@ -154,37 +157,35 @@ void AddPlanets()
 		LengthOfVX > 0 && LengthOfVY > 0 && LengthOfMass > 0 && lengthOfLife > 0  )
 	{
 		char *buf;
-
-		strcpy_s(newplanet->name, sizeof(newplanet->name), "Orvar");
+		strcpy_s(newplanet->name, sizeof(newplanet->name), name);
 		buf = (char*)GlobalAlloc(GPTR, LengthOfX + 1);
-		
+
 		GetDlgItemText(dia1, txt_posx, buf, LengthOfX + 1);
 		_sx = atof(buf);
-
 		buf = (char*)GlobalAlloc(GPTR, LengthOfY + 1);
+
 		GetDlgItemText(dia1, txt_posY, buf, LengthOfY + 1);
 		_sy = atof(buf);
-
 		buf = (char*)GlobalAlloc(GPTR, LengthOfVX + 1);
+
 		GetDlgItemText(dia1, txt_VX, buf, LengthOfVX + 1);
 		_vx = atof(buf);
-
 		buf = (char*)GlobalAlloc(GPTR, LengthOfVY + 1);
+
 		GetDlgItemText(dia1, txt_VY, buf, LengthOfVY + 1);
 		_vy = atof(buf);
-
 		buf = (char*)GlobalAlloc(GPTR, LengthOfMass + 1);
+
 		GetDlgItemText(dia1, txt_mass, buf, LengthOfMass + 1);
 		_mass = atof(buf);
-
 		buf = (char*)GlobalAlloc(GPTR, lengthOfLife + 1);
+
 		GetDlgItemText(dia1, txt_life, buf, lengthOfLife + 1);
 		_life = atof(buf);
-
 		GlobalFree((HANDLE)buf);
 	}
 	else 
-		SetDlgItemText(dia1, txt_name, "Something was missing!");//Något fält är inte ifyllt
+		SetDlgItemText(dia1, txt_name, "Something was missing!");	//Något fält är inte ifyllt
 
 	strcpy_s(newplanet->name, sizeof(newplanet->name), name);
 	newplanet->sx = _sx;										
@@ -195,7 +196,30 @@ void AddPlanets()
 	newplanet->life = _life;
 	newplanet->next = NULL;
 	sprintf_s(newplanet->pid,15, "%lu", GetCurrentProcessId());
-	
+
 	// Send to the file or to list of local planets
 	bytesWritten = mailslotWrite (mailSlot, (void*)newplanet, sizeof(struct pt));
+}
+
+DWORD WINAPI threadRead( void* data ) // read if planet is dead
+{
+	char id[20];
+	char theMessage[200];
+	HANDLE mailSlot;
+	LPTSTR Slot; 
+	char slot[40];
+	strcpy_s(slot, sizeof(slot), "\\\\.\\mailslot\\test");
+	sprintf_s(id,sizeof(id), "%d", data);
+	strcat_s(slot,sizeof(slot),id);
+	Slot = slot;
+	mailSlot = mailslotCreate(Slot);
+	while (1)
+	{
+		int bytesread = mailslotRead(mailSlot, theMessage, 424);
+		if (bytesread > 0)
+		{
+			SendMessage(GetDlgItem(dia2, list_history), LB_INSERTSTRING, NULL, (LPARAM)theMessage);
+		}
+	}
+	mailslotClose (mailSlot);
 }
