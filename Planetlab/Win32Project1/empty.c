@@ -10,9 +10,11 @@ CHAR buff[1024];
 char name[20];
 int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, lengthOfLife;
 double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
+struct pt* root;
 
 LPTSTR Slot = TEXT("\\\\.\\mailslot\\sample_mailslot");
 void AddPlanets();
+void AddPlanetsToList(struct pt *Testplanet);
 DWORD WINAPI threadRead( void* data );
 
 //Första dialogrutans funktioner... (DIALOG2)
@@ -198,11 +200,11 @@ void AddPlanets()
 	newplanet->next = NULL;
 	sprintf_s(newplanet->pid,15, "%lu", GetCurrentProcessId());
 
-
 	// add all planets to a local file and read from that one!
 	//SendMessage(GetDlgItem(dia2, list_localPlanets), LB_INSERTSTRING, NULL, (LPARAM)newplanet);
 	// Send to the file or to list of local planets
-	bytesWritten = mailslotWrite (mailSlot, (void*)newplanet, sizeof(struct pt));
+	//bytesWritten = mailslotWrite (mailSlot, (void*)newplanet, sizeof(struct pt));
+	AddPlanetsToList(newplanet);
 }
 
 DWORD WINAPI threadRead( void* data ) // read if planet is dead
@@ -224,4 +226,23 @@ DWORD WINAPI threadRead( void* data ) // read if planet is dead
 			SendMessage(GetDlgItem(dia2, list_history), LB_INSERTSTRING, NULL, (LPARAM)theMessage);
 	}
 	mailslotClose (mailSlot);
+}
+
+void AddPlanetsToList(struct pt *Testplanet)
+{
+	struct pt* iterator;
+	if(root == NULL)
+	{
+		root = Testplanet;
+	}
+	else
+	{
+		iterator = root;
+		while(iterator->next != NULL)
+		{
+			iterator = iterator->next;
+		}
+		iterator->next = Testplanet;
+	}
+	//threadCreate((LPTHREAD_START_ROUTINE)updatePlanets, Testplanet);
 }
