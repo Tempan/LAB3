@@ -106,9 +106,7 @@ INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		break;
-
 	}
-
 	return FALSE;
 }
 
@@ -116,8 +114,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 {
 	MSG msg;
 	BOOL ret;
-	//DWORD WINAPI threadRead( LPVOID lpParam );
-
 	//öppnar DIALOG1
 	dia1 = CreateDialogParam(hInstance, MAKEINTRESOURCE(DIALOG1), 0, DialogProc1, 0);
 	hInst = hInstance;
@@ -229,5 +225,3 @@ DWORD WINAPI threadRead( void* data ) // read if planet is dead
 	}
 	mailslotClose (mailSlot);
 }
-
-//SendMessage(GetDlgItem(dia2, list_history), LB_INSERTSTRING, NULL, (LPARAM)theMessage);
