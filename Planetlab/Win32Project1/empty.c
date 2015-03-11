@@ -49,6 +49,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//	//UpdateWindow(dia2);
 			break;
 		case btn_SendToServer:
+			OpenFileDialog("load", GENERIC_READ, OPEN_EXISTING);
 			//Send planets to server
 
 			/*gets_s(newplanet->name,sizeof(newplanet->name));
