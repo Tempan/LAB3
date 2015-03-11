@@ -6,27 +6,27 @@
 
 HINSTANCE hInst;
 HWND dia1, dia2;
-HANDLE file;
 CHAR buff[1024];
 char name[20];
 int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, lengthOfLife;
 double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
+struct pt* root;
 
 LPTSTR Slot = TEXT("\\\\.\\mailslot\\sample_mailslot");
-//LPTSTR Slot = TEXT("\\\\.\\mailslot\\mailslot_fromForm");
-HANDLE mailSlot;
 void AddPlanets();
-const DWORD  dwBufferSize = 64;
-DWORD dwBytesRead;
-char szBuffer[64];
-struct pt *loadplanets;
-
-
-
+void AddPlanetsToList(struct pt *Testplanet);
+DWORD WINAPI threadRead( void* data );
 
 //Första dialogrutans funktioner... (DIALOG2)
 INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	HANDLE mailSlot;
+	mailSlot = mailslotConnect(Slot); 
+	/*struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
+	DWORD bytesWritten;
+	Sleep(2000);
+	mailSlot = mailslotConnect(Slot); */
+
 	switch(uMsg)
 	{
 	case WM_COMMAND:
@@ -52,6 +52,9 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//	//UpdateWindow(dia2);
 			break;
 		case btn_SendToServer:
+			break;
+		case btn_openFromFile:
+
 			//Send planets to server
 
 			/*gets_s(newplanet->name,sizeof(newplanet->name));
@@ -64,35 +67,10 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			newplanet->next = NULL;
 
 			bytesWritten = mailslotWrite (mailSlot, (void*)newplanet, sizeof(struct pt));*/
-			break;
-		case btn_openFromFile:
-			file = OpenFileDialog("load", GENERIC_READ, OPEN_EXISTING);
-			 if (file == INVALID_HANDLE_VALUE)
-				return GetLastError();
-
-			 loadplanets = (struct pt*)malloc(sizeof(struct pt));	
-				
-			 ReadFile(file, szBuffer, dwBufferSize, (LPDWORD)dwBytesRead, NULL);
-			 memcpy(loadplanets, szBuffer, sizeof(struct pt));
-			//ReadFile(file, szBuffer, dwBufferSize, (LPDWORD)dwBytesRead, NULL);
-			//SendMessage(GetDlgItem(dia2, list_localPlanets), LB_INSERTSTRING, NULL, (LPARAM)file);
-			SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)szBuffer);
-			break;
-
+			;
 		case btn_SaveInFile:
-			//använd de markerade raderna 
-			
-			file = OpenFileDialog("save", GENERIC_WRITE, OPEN_EXISTING);
 
-			WriteFile(file, szBuffer,  dwBufferSize,  &dwBytesRead, NULL);          
-			
-			
-			break;
-
-		case list_localPlanets:
-
-			break;
-
+			;
 		}
 		break;
 
@@ -114,6 +92,8 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 //Andra dialogrutans funktioner... (DIALOG1)
 INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	HANDLE mailSlot;
+	mailSlot = mailslotConnect(Slot); 
 	switch(uMsg)
 	{
 	case WM_COMMAND:
@@ -128,9 +108,7 @@ INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		break;
-
 	}
-
 	return FALSE;
 }
 
@@ -138,18 +116,16 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 {
 	MSG msg;
 	BOOL ret;
-	//MessageBox(NULL, "It works man?\n", "A cool Mbox", 0);
-	//InitCommonControls();
 	//öppnar DIALOG1
 	dia1 = CreateDialogParam(hInstance, MAKEINTRESOURCE(DIALOG1), 0, DialogProc1, 0);
 	hInst = hInstance;
-
 
 	//öppnar DIALOG2
 	dia2 = CreateDialogParam(hInstance, MAKEINTRESOURCE(DIALOG2), 0, DialogProc2, 0);
 	hInst = hInstance;
 	ShowWindow(dia2, nCmdShow);
 
+	threadCreate(threadRead, (void*)GetCurrentProcessId());
 
 	while((ret = GetMessage(&msg, 0, 0, 0)) != 0) 
 	{
@@ -167,9 +143,11 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 
 void AddPlanets()
 {
+	HANDLE mailSlot;
 	struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
 	DWORD bytesWritten;
 	mailSlot = mailslotConnect(Slot);
+	GetWindowText(GetDlgItem(dia1, txt_name), name, sizeof(name));
 	LengthOfName = GetWindowTextLength(GetDlgItem(dia1, txt_name));
 	LengthOfX = GetWindowTextLength(GetDlgItem(dia1, txt_posx));
 	LengthOfY = GetWindowTextLength(GetDlgItem(dia1, txt_posY));
@@ -182,37 +160,35 @@ void AddPlanets()
 		LengthOfVX > 0 && LengthOfVY > 0 && LengthOfMass > 0 && lengthOfLife > 0  )
 	{
 		char *buf;
-
-		strcpy_s(newplanet->name, sizeof(newplanet->name), "Orvar");
+		strcpy_s(newplanet->name, sizeof(newplanet->name), name);
 		buf = (char*)GlobalAlloc(GPTR, LengthOfX + 1);
-		
+
 		GetDlgItemText(dia1, txt_posx, buf, LengthOfX + 1);
 		_sx = atof(buf);
-
 		buf = (char*)GlobalAlloc(GPTR, LengthOfY + 1);
+
 		GetDlgItemText(dia1, txt_posY, buf, LengthOfY + 1);
 		_sy = atof(buf);
-
 		buf = (char*)GlobalAlloc(GPTR, LengthOfVX + 1);
+
 		GetDlgItemText(dia1, txt_VX, buf, LengthOfVX + 1);
 		_vx = atof(buf);
-
 		buf = (char*)GlobalAlloc(GPTR, LengthOfVY + 1);
+
 		GetDlgItemText(dia1, txt_VY, buf, LengthOfVY + 1);
 		_vy = atof(buf);
-
 		buf = (char*)GlobalAlloc(GPTR, LengthOfMass + 1);
+
 		GetDlgItemText(dia1, txt_mass, buf, LengthOfMass + 1);
 		_mass = atof(buf);
-
 		buf = (char*)GlobalAlloc(GPTR, lengthOfLife + 1);
+
 		GetDlgItemText(dia1, txt_life, buf, lengthOfLife + 1);
 		_life = atof(buf);
-
 		GlobalFree((HANDLE)buf);
 	}
 	else 
-		SetDlgItemText(dia1, txt_name, "Something was missing!");//Något fält är inte ifyllt
+		SetDlgItemText(dia1, txt_name, "Something was missing!");	//Något fält är inte ifyllt
 
 	strcpy_s(newplanet->name, sizeof(newplanet->name), name);
 	newplanet->sx = _sx;										
@@ -223,7 +199,50 @@ void AddPlanets()
 	newplanet->life = _life;
 	newplanet->next = NULL;
 	sprintf_s(newplanet->pid,15, "%lu", GetCurrentProcessId());
-	
+
+	// add all planets to a local file and read from that one!
+	//SendMessage(GetDlgItem(dia2, list_localPlanets), LB_INSERTSTRING, NULL, (LPARAM)newplanet);
 	// Send to the file or to list of local planets
-	bytesWritten = mailslotWrite (mailSlot, (void*)newplanet, sizeof(struct pt));
+	//bytesWritten = mailslotWrite (mailSlot, (void*)newplanet, sizeof(struct pt));
+	AddPlanetsToList(newplanet);
+}
+
+DWORD WINAPI threadRead( void* data ) // read if planet is dead
+{
+	char id[20];
+	char theMessage[200];
+	HANDLE mailSlot;
+	LPTSTR Slot; 
+	char slot[40];
+	strcpy_s(slot, sizeof(slot), "\\\\.\\mailslot\\test");
+	sprintf_s(id,sizeof(id), "%d", data);
+	strcat_s(slot,sizeof(slot),id);
+	Slot = slot;
+	mailSlot = mailslotCreate(Slot);
+	while (1)
+	{
+		int bytesread = mailslotRead(mailSlot, theMessage, 424);
+		if (bytesread > 0)
+			SendMessage(GetDlgItem(dia2, list_history), LB_INSERTSTRING, NULL, (LPARAM)theMessage);
+	}
+	mailslotClose (mailSlot);
+}
+
+void AddPlanetsToList(struct pt *Testplanet)
+{
+	struct pt* iterator;
+	if(root == NULL)
+	{
+		root = Testplanet;
+	}
+	else
+	{
+		iterator = root;
+		while(iterator->next != NULL)
+		{
+			iterator = iterator->next;
+		}
+		iterator->next = Testplanet;
+	}
+	//threadCreate((LPTHREAD_START_ROUTINE)updatePlanets, Testplanet);
 }
