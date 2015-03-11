@@ -122,13 +122,12 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 	dia1 = CreateDialogParam(hInstance, MAKEINTRESOURCE(DIALOG1), 0, DialogProc1, 0);
 	hInst = hInstance;
 
-
 	//öppnar DIALOG2
 	dia2 = CreateDialogParam(hInstance, MAKEINTRESOURCE(DIALOG2), 0, DialogProc2, 0);
 	hInst = hInstance;
 	ShowWindow(dia2, nCmdShow);
 
-	threadCreate(threadRead, 0);
+	threadCreate(threadRead, (void*)GetCurrentProcessId());
 
 	while((ret = GetMessage(&msg, 0, 0, 0)) != 0) 
 	{
