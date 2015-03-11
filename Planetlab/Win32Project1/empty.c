@@ -12,14 +12,13 @@ int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, le
 double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
 
 LPTSTR Slot = TEXT("\\\\.\\mailslot\\sample_mailslot");
-HANDLE mailSlot;
 void AddPlanets();
 DWORD WINAPI threadRead( void* data );
 
 //Första dialogrutans funktioner... (DIALOG2)
 INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-
+	HANDLE mailSlot;
 	mailSlot = mailslotConnect(Slot); 
 	/*struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
 	DWORD bytesWritten;
@@ -53,7 +52,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case btn_SendToServer:
 			break;
 		case btn_openFromFile:
-			
+
 			//Send planets to server
 
 			/*gets_s(newplanet->name,sizeof(newplanet->name));
@@ -91,6 +90,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 //Andra dialogrutans funktioner... (DIALOG1)
 INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	HANDLE mailSlot;
 	mailSlot = mailslotConnect(Slot); 
 	switch(uMsg)
 	{
@@ -116,6 +116,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 {
 	MSG msg;
 	BOOL ret;
+	//DWORD WINAPI threadRead( LPVOID lpParam );
+
 	//öppnar DIALOG1
 	dia1 = CreateDialogParam(hInstance, MAKEINTRESOURCE(DIALOG1), 0, DialogProc1, 0);
 	hInst = hInstance;
@@ -144,6 +146,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 
 void AddPlanets()
 {
+	HANDLE mailSlot;
 	struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
 	DWORD bytesWritten;
 	mailSlot = mailslotConnect(Slot);
@@ -200,6 +203,9 @@ void AddPlanets()
 	newplanet->next = NULL;
 	sprintf_s(newplanet->pid,15, "%lu", GetCurrentProcessId());
 
+
+	// add all planets to a local file and read from that one!
+	//SendMessage(GetDlgItem(dia2, list_localPlanets), LB_INSERTSTRING, NULL, (LPARAM)newplanet);
 	// Send to the file or to list of local planets
 	bytesWritten = mailslotWrite (mailSlot, (void*)newplanet, sizeof(struct pt));
 }
@@ -220,9 +226,9 @@ DWORD WINAPI threadRead( void* data ) // read if planet is dead
 	{
 		int bytesread = mailslotRead(mailSlot, theMessage, 424);
 		if (bytesread > 0)
-		{
 			SendMessage(GetDlgItem(dia2, list_history), LB_INSERTSTRING, NULL, (LPARAM)theMessage);
-		}
 	}
 	mailslotClose (mailSlot);
 }
+
+//SendMessage(GetDlgItem(dia2, list_history), LB_INSERTSTRING, NULL, (LPARAM)theMessage);
