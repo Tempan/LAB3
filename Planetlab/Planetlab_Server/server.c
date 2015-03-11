@@ -112,25 +112,12 @@ LRESULT CALLBACK MainWndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam 
 	static DWORD color = 0;
 
 	switch( msg ) {
-		/**************************************************************/
-		/*    WM_CREATE:        (received on window creation)
-		/**************************************************************/
+
 	case WM_CREATE:       
 		hDC = GetDC(hWnd);  
 		break;   
-		/**************************************************************/
-		/*    WM_TIMER:         (received when our timer expires)
-		/**************************************************************/
+
 	case WM_TIMER:
-
-		/* NOTE: replace code below for periodic update of the window */
-		/*       e.g. draw a planet system)                           */
-		/* NOTE: this is referred to as the 'graphics' thread in the lab spec. */
-
-		/* here we draw a simple sinus curve in the window    */
-		/* just to show how pixels are drawn                  */
-		//posX += 4;
-		//posY -= 2; //(int) (10 * sin(posX / (double) 30) + 20);
 
 		iterator = root;
 		while(iterator != NULL)
@@ -140,10 +127,6 @@ LRESULT CALLBACK MainWndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam 
 		}
 		windowRefreshTimer (hWnd, UPDATE_FREQ);
 		break;
-		/****************************************************************\
-		*     WM_PAINT: (received when the window needs to be repainted, *
-		*               e.g. when maximizing the window)                 *
-		\****************************************************************/
 
 	case WM_PAINT:
 		/* NOTE: The code for this message can be removed. It's just */
@@ -153,24 +136,12 @@ LRESULT CALLBACK MainWndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam 
 		//TextOut( context, 10, 10, "Hello, World!", 13 ); /* 13 is the string length */
 		EndPaint( hWnd, &ps );
 		break;
-		/**************************************************************\
-		*     WM_DESTROY: PostQuitMessage() is called                  *
-		*     (received when the user presses the "quit" button in the *
-		*      window)                                                 *
-		\**************************************************************/
+
 	case WM_DESTROY:
 		PostQuitMessage( 0 );
-		/* NOTE: Windows will automatically release most resources this */
-		/*       process is using, e.g. memory and mailslots.           */
-		/*       (So even though we don't free the memory which has been*/     
-		/*       allocated by us, there will not be memory leaks.)      */
-
 		ReleaseDC(hWnd, hDC); /* Some housekeeping */
 		break;
 
-		/**************************************************************\
-		*     Let the default window proc handle all other messages    *
-		\**************************************************************/
 	default:
 		return( DefWindowProc( hWnd, msg, wParam, lParam )); 
 	}
@@ -199,7 +170,6 @@ void checkPlanets(struct pt *Testplanet)
 void* updatePlanets(void* planeten) // Ska uppdatera rutan och flytta planeternas pixlar
 {
 	double r, a1, totX, totY;
-	int flag = 0;
 	char messageWhyDie[200];
 	struct pt *planet = (struct pt*)planeten;
 	struct pt* iterator;
@@ -238,22 +208,19 @@ void* updatePlanets(void* planeten) // Ska uppdatera rutan och flytta planeterna
 		//döda om den är utanför
 		if(planet->sx < 0 || planet->sx > 800 || planet->sy < 0 || planet->sy > 600)
 		{
-			planet->life = 0;
-			flag = 1;
+			strcpy_s(messageWhyDie, sizeof(messageWhyDie), planet->name);
+			strcat_s(messageWhyDie, sizeof(messageWhyDie), " died because out of bounds!");
+			mailslotWrite(messages, messageWhyDie, 200);
+			removePlanets(planet);
+			return NULL;
 		}
 		planet->life = planet->life - 1;		//minska liv med 1
 		Sleep(UPDATE_FREQ);
 	}
 	//die because life < 1
 	strcpy_s(messageWhyDie, sizeof(messageWhyDie), planet->name);
-	if (flag == 0)
-	{
-		strcat_s(messageWhyDie, sizeof(messageWhyDie), " died because out of lifes!");
-	}
-	else
-	{
-		strcat_s(messageWhyDie, sizeof(messageWhyDie), " died because out of bounds!");
-	}
+	strcat_s(messageWhyDie, sizeof(messageWhyDie), " died because out of lifes!");
+
 	mailslotWrite(messages, messageWhyDie, 200);
 	removePlanets(planet);
 }
@@ -263,6 +230,7 @@ void removePlanets(struct pt* planeten)
 	struct pt *planet = (struct pt*)planeten;
 	struct pt* iterator;
 	struct pt* swapper;
+	EnterCriticalSection(&Crit);
 	iterator = root;
 	if(planet = root)
 	{
@@ -290,4 +258,5 @@ void removePlanets(struct pt* planeten)
 				iterator = iterator->next;
 		}
 	}
+	LeaveCriticalSection(&Crit);
 }

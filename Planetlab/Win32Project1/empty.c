@@ -11,7 +11,8 @@ char name[20];
 int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, lengthOfLife;
 double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
 
-LPTSTR Slot = TEXT("\\\\.\\mailslot\\mailslot_fromForm");
+LPTSTR Slot = TEXT("\\\\.\\mailslot\\sample_mailslot");
+//LPTSTR Slot = TEXT("\\\\.\\mailslot\\mailslot_fromForm");
 HANDLE mailSlot;
 void AddPlanets();
 
@@ -29,8 +30,8 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch(LOWORD(wParam))
 		{
 		case btn_exit:
-			DestroyWindow(dia1);
-			DestroyWindow(dia2);
+			CloseWindow(dia1);
+			CloseWindow(dia2);
 			//SendMessage(hDlg, WM_CLOSE, 0, 0);
 			return TRUE;
 
@@ -38,7 +39,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			ShowWindow(dia1, 1);
 			break;
 
-			//case btn_start:
+		case btn_start:
 			//	//setWindowText();
 			//	LPCSTR nrplanets;
 			//	int nrofplanets = 0;
@@ -46,7 +47,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//	//SetWindowText(dia2, "HEJJJJJJJJ!!!!");
 			//	SetDlgItemText(dia2,TXT_NrOfLocalPlanets, nrofplanets);
 			//	//UpdateWindow(dia2);
-			//	break;
+			break;
 		case btn_SendToServer:
 			//Send planets to server
 
@@ -154,11 +155,9 @@ void AddPlanets()
 	{
 		char *buf;
 
-		buf = (char*)GlobalAlloc(GPTR, LengthOfName + 1);
-		GetDlgItemText(dia1, txt_name, buf, LengthOfName + 1);
-		strcpy_s(name, sizeof(buf), buf);
-
+		strcpy_s(newplanet->name, sizeof(newplanet->name), "Orvar");
 		buf = (char*)GlobalAlloc(GPTR, LengthOfX + 1);
+		
 		GetDlgItemText(dia1, txt_posx, buf, LengthOfX + 1);
 		_sx = atof(buf);
 
@@ -196,5 +195,7 @@ void AddPlanets()
 	newplanet->life = _life;
 	newplanet->next = NULL;
 	sprintf_s(newplanet->pid,15, "%lu", GetCurrentProcessId());
+	
+	// Send to the file or to list of local planets
 	bytesWritten = mailslotWrite (mailSlot, (void*)newplanet, sizeof(struct pt));
 }
