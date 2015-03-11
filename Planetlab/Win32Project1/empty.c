@@ -6,6 +6,7 @@
 
 HINSTANCE hInst;
 HWND dia1, dia2;
+HANDLE file;
 CHAR buff[1024];
 char name[20];
 int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, lengthOfLife;
@@ -15,15 +16,17 @@ LPTSTR Slot = TEXT("\\\\.\\mailslot\\sample_mailslot");
 //LPTSTR Slot = TEXT("\\\\.\\mailslot\\mailslot_fromForm");
 HANDLE mailSlot;
 void AddPlanets();
+const DWORD  dwBufferSize = 64;
+DWORD dwBytesRead;
+char szBuffer[64];
+struct pt *loadplanets;
+
+
+
 
 //Första dialogrutans funktioner... (DIALOG2)
 INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	/*struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
-	DWORD bytesWritten;
-	Sleep(2000);
-	mailSlot = mailslotConnect(Slot); */
-
 	switch(uMsg)
 	{
 	case WM_COMMAND:
@@ -49,9 +52,6 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//	//UpdateWindow(dia2);
 			break;
 		case btn_SendToServer:
-			break;
-		case btn_openFromFile:
-			
 			//Send planets to server
 
 			/*gets_s(newplanet->name,sizeof(newplanet->name));
@@ -64,10 +64,35 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			newplanet->next = NULL;
 
 			bytesWritten = mailslotWrite (mailSlot, (void*)newplanet, sizeof(struct pt));*/
-			;
-		case btn_SaveInFile:
+			break;
+		case btn_openFromFile:
+			file = OpenFileDialog("load", GENERIC_READ, OPEN_EXISTING);
+			 if (file == INVALID_HANDLE_VALUE)
+				return GetLastError();
 
-			;
+			 loadplanets = (struct pt*)malloc(sizeof(struct pt));	
+				
+			 ReadFile(file, szBuffer, dwBufferSize, (LPDWORD)dwBytesRead, NULL);
+			 memcpy(loadplanets, szBuffer, sizeof(struct pt));
+			//ReadFile(file, szBuffer, dwBufferSize, (LPDWORD)dwBytesRead, NULL);
+			//SendMessage(GetDlgItem(dia2, list_localPlanets), LB_INSERTSTRING, NULL, (LPARAM)file);
+			SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)szBuffer);
+			break;
+
+		case btn_SaveInFile:
+			//använd de markerade raderna 
+			
+			file = OpenFileDialog("save", GENERIC_WRITE, OPEN_EXISTING);
+
+			WriteFile(file, szBuffer,  dwBufferSize,  &dwBytesRead, NULL);          
+			
+			
+			break;
+
+		case list_localPlanets:
+
+			break;
+
 		}
 		break;
 
