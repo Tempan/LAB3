@@ -6,26 +6,32 @@
 
 HINSTANCE hInst;
 HWND dia1, dia2;
-CHAR buff[1024];
 char name[20];
 int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, lengthOfLife;
 double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
 struct pt* root;
 
 LPTSTR Slot = TEXT("\\\\.\\mailslot\\sample_mailslot");
-void AddPlanets();
 void AddPlanetsToList(struct pt *Testplanet);
+void AddPlanets();
 DWORD WINAPI threadRead( void* data );
+
+
 
 //Första dialogrutans funktioner... (DIALOG2)
 INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	HANDLE mailSlot;
+	DWORD dwBytesRead;
+	planet_type loadplanets;
+	HANDLE mailSlot, file;
+	char buffer[sizeof(struct pt)];
+	char temp[sizeof(struct pt)];
 	mailSlot = mailslotConnect(Slot); 
 	/*struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
 	DWORD bytesWritten;
 	Sleep(2000);
 	mailSlot = mailslotConnect(Slot); */
+
 
 	switch(uMsg)
 	{
@@ -33,13 +39,17 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch(LOWORD(wParam))
 		{
 		case btn_exit:
-			CloseWindow(dia1);
-			CloseWindow(dia2);
+			//CloseWindow(dia1);
+			//CloseWindow(dia2);
+			DestroyWindow(dia1);
+			DestroyWindow(dia2);
 			//SendMessage(hDlg, WM_CLOSE, 0, 0);
-			break;
+			return TRUE;
+
 		case btn_createPlanet:
 			ShowWindow(dia1, 1);
 			break;
+
 		case btn_start:
 			//	//setWindowText();
 			//	LPCSTR nrplanets;
@@ -50,11 +60,9 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//	//UpdateWindow(dia2);
 			break;
 		case btn_SendToServer:
+			//Send planets to server
 
-			break;
-		case btn_openFromFile:
-			/*Send planets to server
-			gets_s(newplanet->name,sizeof(newplanet->name));
+			/*gets_s(newplanet->name,sizeof(newplanet->name));
 			newplanet->sx = _sx;										
 			newplanet->sy = _sy;											
 			newplanet->vx = _vy;											
@@ -65,21 +73,42 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			bytesWritten = mailslotWrite (mailSlot, (void*)newplanet, sizeof(struct pt));*/
 			break;
+		case btn_openFromFile:
+			
+			file = OpenFileDialog("load", GENERIC_READ, OPEN_EXISTING);
+			if (file == INVALID_HANDLE_VALUE)
+				return GetLastError();
+
+			do
+			{
+				memcpy(temp, buffer, sizeof(struct pt));
+				ReadFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
+				if (strcmp(((struct pt*)temp)->name, ((struct pt*)buffer)->name))
+					SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)buffer);
+			} while (dwBytesRead != 0);
+			CloseHandle(file);
+			break;
+
+			
 		case btn_SaveInFile:
+			file = OpenFileDialog("save", GENERIC_WRITE, OPEN_EXISTING);
+			if (file == INVALID_HANDLE_VALUE)
+				return GetLastError();
+			//ta data från listan och lägg i buffer??
+			WriteFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
+
+			CloseHandle(file);
 			break;
 		}
 		break;
 
-		/*case WM_CLOSE:
-		if(MessageBox(hDlg, TEXT("Close the program?"), TEXT("Close"), MB_ICONQUESTION | MB_YESNO) == IDYES)
-		{
-		DestroyWindow(hDlg);
-		}
-		return TRUE;
+		case WM_CLOSE:
+			DestroyWindow(hDlg);
+			return TRUE;
 
 		case WM_DESTROY:
-		PostQuitMessage(0);
-		return TRUE;*/
+			PostQuitMessage(0);
+			return TRUE;
 	}
 
 	return FALSE;
@@ -114,11 +143,9 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 	BOOL ret;
 	//öppnar DIALOG1
 	dia1 = CreateDialogParam(hInstance, MAKEINTRESOURCE(DIALOG1), 0, DialogProc1, 0);
-	hInst = hInstance;
 
 	//öppnar DIALOG2
 	dia2 = CreateDialogParam(hInstance, MAKEINTRESOURCE(DIALOG2), 0, DialogProc2, 0);
-	hInst = hInstance;
 	ShowWindow(dia2, nCmdShow);
 
 	threadCreate(threadRead, (void*)GetCurrentProcessId());
@@ -128,11 +155,12 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 		if(ret == -1)
 			return -1;
 
-		if(!IsDialogMessage(dia2, &msg)) 
+		if(!IsDialogMessage(dia2, &msg) && !IsDialogMessage(dia1, &msg)) 
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+		
 	}
 	return 1;
 }
