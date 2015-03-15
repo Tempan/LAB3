@@ -16,8 +16,6 @@ void AddPlanetsToList(struct pt *Testplanet);
 void AddPlanets();
 DWORD WINAPI threadRead( void* data );
 
-
-
 //Första dialogrutans funktioner... (DIALOG2)
 INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -60,6 +58,8 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//	//UpdateWindow(dia2);
 			break;
 		case btn_SendToServer:
+			//threadCreate((LPTHREAD_START_ROUTINE)updatePlanets, root);
+			//mailslotWrite (mailSlot, (void*)root, sizeof(struct pt));
 			//Send planets to server
 
 			/*gets_s(newplanet->name,sizeof(newplanet->name));
@@ -268,5 +268,4 @@ void AddPlanetsToList(struct pt *Testplanet)
 		}
 		iterator->next = Testplanet;
 	}
-	//threadCreate((LPTHREAD_START_ROUTINE)updatePlanets, Testplanet);
 }
