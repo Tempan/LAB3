@@ -36,12 +36,10 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			CloseWindow(dia1);
 			CloseWindow(dia2);
 			//SendMessage(hDlg, WM_CLOSE, 0, 0);
-			return TRUE;
-
+			break;
 		case btn_createPlanet:
 			ShowWindow(dia1, 1);
 			break;
-
 		case btn_start:
 			//	//setWindowText();
 			//	LPCSTR nrplanets;
@@ -52,12 +50,11 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//	//UpdateWindow(dia2);
 			break;
 		case btn_SendToServer:
+
 			break;
 		case btn_openFromFile:
-
-			//Send planets to server
-
-			/*gets_s(newplanet->name,sizeof(newplanet->name));
+			/*Send planets to server
+			gets_s(newplanet->name,sizeof(newplanet->name));
 			newplanet->sx = _sx;										
 			newplanet->sy = _sy;											
 			newplanet->vx = _vy;											
@@ -67,10 +64,9 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			newplanet->next = NULL;
 
 			bytesWritten = mailslotWrite (mailSlot, (void*)newplanet, sizeof(struct pt));*/
-			;
+			break;
 		case btn_SaveInFile:
-
-			;
+			break;
 		}
 		break;
 
