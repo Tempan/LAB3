@@ -14,6 +14,7 @@ struct pt* root;
 LPTSTR Slot = TEXT("\\\\.\\mailslot\\sample_mailslot");
 void AddPlanetsToList(struct pt *Testplanet);
 void AddPlanets();
+void sendToServer();
 DWORD WINAPI threadRead( void* data );
 
 //Första dialogrutans funktioner... (DIALOG2)
@@ -55,23 +56,11 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//	//UpdateWindow(dia2);
 			break;
 		case btn_SendToServer:
-			//threadCreate((LPTHREAD_START_ROUTINE)updatePlanets, root);
-			//mailslotWrite (mailSlot, (void*)root, sizeof(struct pt));
-			//Send planets to server
+			sendToServer();
 
-			/*gets_s(newplanet->name,sizeof(newplanet->name));
-			newplanet->sx = _sx;										
-			newplanet->sy = _sy;											
-			newplanet->vx = _vy;											
-			newplanet->vy = _vx;											
-			newplanet->mass = _mass;											
-			newplanet->life = _life;
-			newplanet->next = NULL;
-
-			bytesWritten = mailslotWrite (mailSlot, (void*)newplanet, sizeof(struct pt));*/
 			break;
 		case btn_openFromFile:
-			
+
 			file = OpenFileDialog("load", GENERIC_READ, OPEN_EXISTING);
 			if (file == INVALID_HANDLE_VALUE)
 				return GetLastError();
@@ -86,7 +75,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			CloseHandle(file);
 			break;
 
-			
+
 		case btn_SaveInFile:
 			file = OpenFileDialog("save", GENERIC_WRITE, OPEN_EXISTING);
 			if (file == INVALID_HANDLE_VALUE)
@@ -99,13 +88,13 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 
-		case WM_CLOSE:
-			CloseWindow(hDlg);
-			return TRUE;
+	case WM_CLOSE:
+		CloseWindow(hDlg);
+		return TRUE;
 
-		case WM_DESTROY:
-			PostQuitMessage(0);
-			return TRUE;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		return TRUE;
 	}
 
 	return FALSE;
@@ -157,7 +146,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		
+
 	}
 	return 1;
 }
@@ -229,7 +218,7 @@ void AddPlanets()
 	AddPlanetsToList(newplanet);
 }
 
- // read if planet is dead
+// read if planet is dead
 DWORD WINAPI threadRead( void* data )
 {
 	char id[20];
@@ -242,6 +231,7 @@ DWORD WINAPI threadRead( void* data )
 	strcat_s(slot,sizeof(slot),id);
 	Slot = slot;
 	mailSlot = mailslotCreate(Slot);
+	Sleep(2000);		// make sure mailslotConnect is done before starting the loop!!
 	while (1)
 	{
 		int bytesread = mailslotRead(mailSlot, theMessage, 424);
@@ -267,5 +257,20 @@ void AddPlanetsToList(struct pt *Testplanet)
 			iterator = iterator->next;
 		}
 		iterator->next = Testplanet;
+	}
+}
+
+//Sent all the planets to the server
+void sendToServer()
+{
+	HANDLE mailSlot;
+	struct pt* planetToSend;
+	planetToSend = root;
+	mailSlot = mailslotConnect(Slot); 
+	Sleep(2000); // make sure mailslotConnect is done before starting the loop!!
+	while(planetToSend != NULL)
+	{
+		mailslotWrite (mailSlot, (void*)planetToSend, sizeof(struct pt));
+		planetToSend = planetToSend->next;
 	}
 }
