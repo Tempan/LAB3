@@ -38,7 +38,6 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			return TRUE;
 
 		case btn_createPlanet:
-
 			ShowWindow(dia1, 1);
 			break;
 
@@ -53,7 +52,6 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 		case btn_SendToServer:
 			sendToServer();
-
 			break;
 		case btn_openFromFile:
 
@@ -85,10 +83,6 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			file = OpenFileDialog("save", GENERIC_WRITE, OPEN_EXISTING);
 			if (file == INVALID_HANDLE_VALUE)
 				return GetLastError();
-
-
-
-
 
 			//ta data från listan och lägg i buffer??
 			WriteFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
