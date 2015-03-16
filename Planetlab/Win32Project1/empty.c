@@ -37,11 +37,8 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch(LOWORD(wParam))
 		{
 		case btn_exit:
-			//CloseWindow(dia1);
-			//CloseWindow(dia2);
-			DestroyWindow(dia1);
-			DestroyWindow(dia2);
-			//SendMessage(hDlg, WM_CLOSE, 0, 0);
+			CloseWindow(dia1);
+			CloseWindow(dia2);
 			return TRUE;
 
 		case btn_createPlanet:
@@ -103,7 +100,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		break;
 
 		case WM_CLOSE:
-			DestroyWindow(hDlg);
+			CloseWindow(hDlg);
 			return TRUE;
 
 		case WM_DESTROY:
