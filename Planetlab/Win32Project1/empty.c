@@ -11,7 +11,6 @@ int amount = 0;
 int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, lengthOfLife;
 double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
 struct pt* root;
-
 LPTSTR Slot = TEXT("\\\\.\\mailslot\\sample_mailslot");
 void AddPlanetsToList(struct pt *Testplanet);
 void AddPlanets();
