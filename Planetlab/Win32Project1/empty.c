@@ -11,7 +11,6 @@ int amount = 0;
 int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, lengthOfLife;
 double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
 struct pt* root;
-
 LPTSTR Slot = TEXT("\\\\.\\mailslot\\sample_mailslot");
 void AddPlanetsToList(struct pt *Testplanet);
 void AddPlanets();
@@ -189,30 +188,31 @@ void AddPlanets()
 	{
 		char *buf;
 		strcpy_s(newplanet->name, sizeof(newplanet->name), name);
+		
 		buf = (char*)GlobalAlloc(GPTR, LengthOfX + 1);
-
 		GetDlgItemText(dia1, txt_posx, buf, LengthOfX + 1);
 		_sx = atof(buf);
+		
 		buf = (char*)GlobalAlloc(GPTR, LengthOfY + 1);
-
 		GetDlgItemText(dia1, txt_posY, buf, LengthOfY + 1);
 		_sy = atof(buf);
+		
 		buf = (char*)GlobalAlloc(GPTR, LengthOfVX + 1);
-
 		GetDlgItemText(dia1, txt_VX, buf, LengthOfVX + 1);
 		_vx = atof(buf);
+		
 		buf = (char*)GlobalAlloc(GPTR, LengthOfVY + 1);
-
 		GetDlgItemText(dia1, txt_VY, buf, LengthOfVY + 1);
 		_vy = atof(buf);
-		buf = (char*)GlobalAlloc(GPTR, LengthOfMass + 1);
 
+		buf = (char*)GlobalAlloc(GPTR, LengthOfMass + 1);
 		GetDlgItemText(dia1, txt_mass, buf, LengthOfMass + 1);
 		_mass = atof(buf);
+		
 		buf = (char*)GlobalAlloc(GPTR, lengthOfLife + 1);
-
 		GetDlgItemText(dia1, txt_life, buf, lengthOfLife + 1);
 		_life = atof(buf);
+		
 		GlobalFree((HANDLE)buf);
 	}
 	else 
