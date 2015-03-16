@@ -162,6 +162,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 	return 1;
 }
 
+//Check if everything is correctly done so we can add the planet to the list
 void AddPlanets()
 {
 	HANDLE mailSlot;
@@ -228,7 +229,8 @@ void AddPlanets()
 	AddPlanetsToList(newplanet);
 }
 
-DWORD WINAPI threadRead( void* data ) // read if planet is dead
+ // read if planet is dead
+DWORD WINAPI threadRead( void* data )
 {
 	char id[20];
 	char theMessage[200];
@@ -249,6 +251,7 @@ DWORD WINAPI threadRead( void* data ) // read if planet is dead
 	mailslotClose (mailSlot);
 }
 
+//Add planet to list linked to root
 void AddPlanetsToList(struct pt *Testplanet)
 {
 	struct pt* iterator;
