@@ -74,7 +74,9 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				ReadFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
 				if (strcmp(((struct pt*)temp)->name, ((struct pt*)buffer)->name))
 				{
-					SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)buffer);
+					
+					//SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)buffer);
+					AddPlanetsToList((struct pt*)temp);
 					amount++;
 				}
 			} while (dwBytesRead != 0);
@@ -87,6 +89,11 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			file = OpenFileDialog("save", GENERIC_WRITE, OPEN_EXISTING);
 			if (file == INVALID_HANDLE_VALUE)
 				return GetLastError();
+
+
+
+
+
 			//ta data från listan och lägg i buffer??
 			WriteFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
 
