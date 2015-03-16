@@ -69,7 +69,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				{
 					
 					//SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)buffer);
-					readFromFile((struct pt*)temp);
+					readFromFile((struct pt*)buffer);
 				}
 			} while (dwBytesRead != 0);
 			CloseHandle(file);
@@ -243,22 +243,24 @@ DWORD WINAPI threadRead( void* data )
 //Add planet to list linked to root
 void AddPlanetsToList(struct pt *Testplanet)
 {
-	struct pt* iterator;
+	struct pt * newplanet= (struct pt*)malloc(sizeof(struct pt));
+	memcpy(newplanet, Testplanet, sizeof(struct pt));
+	
 	if(root == NULL)
 	{
-		root = Testplanet;
+		root = newplanet;
 	}
 	else
 	{
-		iterator = root;
+		struct pt* iterator = root;
 		while(iterator->next != NULL)
 		{
 			iterator = iterator->next;
 		}
-		iterator->next = Testplanet;
+		iterator->next = newplanet;
 	}
 	//SendMessage(GetDlgItem(dia2, list_localPlanets), LB_INSERTSTRING, NULL, (LPARAM)Testplanet);
-	SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)Testplanet);
+	SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)Testplanet->name);
 	amount++;
 
 }
@@ -281,6 +283,6 @@ void sendToServer()
 void readFromFile(struct pt* Testplanet)
 {
 	Testplanet->next = NULL;
-	sprintf_s(Testplanet->pid,15, "%lu", GetCurrentProcessId());
+	sprintf_s(Testplanet->pid,15, "%lu ", GetCurrentProcessId());
 	AddPlanetsToList(Testplanet);
 }
