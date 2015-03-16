@@ -7,6 +7,7 @@
 HINSTANCE hInst;
 HWND dia1, dia2;
 char name[20];
+int amount = 0;
 int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, lengthOfLife;
 double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
 struct pt* root;
@@ -24,7 +25,8 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	HANDLE mailSlot, file;
 	char buffer[sizeof(struct pt)];
 	char temp[sizeof(struct pt)];
-	mailSlot = mailslotConnect(Slot); 
+	mailSlot = mailslotConnect(Slot);
+	
 	/*struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
 	DWORD bytesWritten;
 	Sleep(2000);
@@ -42,6 +44,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			return TRUE;
 
 		case btn_createPlanet:
+
 			ShowWindow(dia1, 1);
 			break;
 
@@ -81,9 +84,13 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				memcpy(temp, buffer, sizeof(struct pt));
 				ReadFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
 				if (strcmp(((struct pt*)temp)->name, ((struct pt*)buffer)->name))
+				{
 					SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)buffer);
+					amount++;
+				}
 			} while (dwBytesRead != 0);
 			CloseHandle(file);
+			SetDlgItemInt(dia2,TXT_NrOfLocalPlanets, amount, FALSE);
 			break;
 
 			
