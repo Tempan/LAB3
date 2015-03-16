@@ -27,12 +27,6 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	char temp[sizeof(struct pt)];
 	mailSlot = mailslotConnect(Slot);
 	
-	/*struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
-	DWORD bytesWritten;
-	Sleep(2000);
-	mailSlot = mailslotConnect(Slot); */
-
-
 	switch(uMsg)
 	{
 	case WM_COMMAND:
