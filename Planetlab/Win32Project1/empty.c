@@ -211,10 +211,6 @@ void AddPlanets()
 	newplanet->next = NULL;
 	sprintf_s(newplanet->pid,15, "%lu", GetCurrentProcessId());
 
-	// add all planets to a local file and read from that one!
-	//SendMessage(GetDlgItem(dia2, list_localPlanets), LB_INSERTSTRING, NULL, (LPARAM)newplanet);
-	// Send to the file or to list of local planets
-	//bytesWritten = mailslotWrite (mailSlot, (void*)newplanet, sizeof(struct pt));
 	AddPlanetsToList(newplanet);
 }
 
@@ -258,6 +254,8 @@ void AddPlanetsToList(struct pt *Testplanet)
 		}
 		iterator->next = Testplanet;
 	}
+	SendMessage(GetDlgItem(dia2, list_localPlanets), LB_INSERTSTRING, NULL, (LPARAM)Testplanet);
+
 }
 
 //Sent all the planets to the server
