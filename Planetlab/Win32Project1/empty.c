@@ -76,6 +76,9 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				{
 					
 					//SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)buffer);
+					((struct pt*)temp)->next = NULL;
+						sprintf_s(((struct pt*)temp)->pid,15, "%lu", GetCurrentProcessId());
+					//((struct pt*)temp)->pid =  GetCurrentProcessId();
 					AddPlanetsToList((struct pt*)temp);
 					amount++;
 				}
@@ -268,7 +271,8 @@ void AddPlanetsToList(struct pt *Testplanet)
 		}
 		iterator->next = Testplanet;
 	}
-	SendMessage(GetDlgItem(dia2, list_localPlanets), LB_INSERTSTRING, NULL, (LPARAM)Testplanet);
+	//SendMessage(GetDlgItem(dia2, list_localPlanets), LB_INSERTSTRING, NULL, (LPARAM)Testplanet);
+	SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)Testplanet);
 	amount++;
 
 }
