@@ -16,6 +16,7 @@ void AddPlanetsToList(struct pt *);
 void AddPlanets();
 void sendToServer();
 void readFromFile(struct pt*);
+void writeToFile();
 DWORD WINAPI threadRead( void* data );
 
 //Första dialogrutans funktioner... (DIALOG2)
@@ -69,13 +70,11 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				ReadFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
 				if (strcmp(((struct pt*)temp)->name, ((struct pt*)buffer)->name))
 				{
-
-					//SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)buffer);
 					readFromFile((struct pt*)buffer);
 				}
 			} while (dwBytesRead != 0);
+
 			CloseHandle(file);
-			SetDlgItemInt(dia2,TXT_NrOfLocalPlanets, amount, FALSE);
 			break;
 
 
@@ -83,6 +82,8 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			file = OpenFileDialog("save", GENERIC_WRITE, OPEN_EXISTING);
 			if (file == INVALID_HANDLE_VALUE)
 				return GetLastError();
+
+			LB_GETSELITEMS(LB_GETSELCOUNT(0,0), buffer);
 
 			//ta data från listan och lägg i buffer??
 			WriteFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
@@ -264,6 +265,7 @@ void AddPlanetsToList(struct pt *Testplanet)
 	//SendMessage(GetDlgItem(dia2, list_localPlanets), LB_INSERTSTRING, NULL, (LPARAM)Testplanet);
 	SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)Testplanet->name);
 	amount++;
+	SetDlgItemInt(dia2,TXT_NrOfLocalPlanets, amount, FALSE);
 
 }
 
@@ -287,4 +289,9 @@ void readFromFile(struct pt* Testplanet)
 	Testplanet->next = NULL;
 	sprintf_s(Testplanet->pid,15, "%lu ", GetCurrentProcessId());
 	AddPlanetsToList(Testplanet);
+}
+
+void writeToFile()
+{
+
 }
