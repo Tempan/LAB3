@@ -262,6 +262,7 @@ void AddPlanetsToList(struct pt *Testplanet)
 		iterator->next = Testplanet;
 	}
 	SendMessage(GetDlgItem(dia2, list_localPlanets), LB_INSERTSTRING, NULL, (LPARAM)Testplanet);
+	amount++;
 
 }
 
