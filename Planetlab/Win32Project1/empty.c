@@ -12,9 +12,10 @@ int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, le
 double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
 struct pt* root;
 LPTSTR Slot = TEXT("\\\\.\\mailslot\\sample_mailslot");
-void AddPlanetsToList(struct pt *Testplanet);
+void AddPlanetsToList(struct pt *);
 void AddPlanets();
 void sendToServer();
+void readFromFile(struct pt*);
 DWORD WINAPI threadRead( void* data );
 
 //Första dialogrutans funktioner... (DIALOG2)
@@ -70,16 +71,13 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			do
 			{
 				memcpy(temp, buffer, sizeof(struct pt));
+
 				ReadFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
 				if (strcmp(((struct pt*)temp)->name, ((struct pt*)buffer)->name))
 				{
 					
 					//SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)buffer);
-					((struct pt*)temp)->next = NULL;
-						sprintf_s(((struct pt*)temp)->pid,15, "%lu", GetCurrentProcessId());
-					//((struct pt*)temp)->pid =  GetCurrentProcessId();
-					AddPlanetsToList((struct pt*)temp);
-					amount++;
+					readFromFile((struct pt*)temp);
 				}
 			} while (dwBytesRead != 0);
 			CloseHandle(file);
@@ -290,4 +288,11 @@ void sendToServer()
 		mailslotWrite (mailSlot, (void*)planetToSend, sizeof(struct pt));
 		planetToSend = planetToSend->next;
 	}
+}
+
+void readFromFile(struct pt* Testplanet)
+{
+	Testplanet->next = NULL;
+	sprintf_s(Testplanet->pid,15, "%lu", GetCurrentProcessId());
+	AddPlanetsToList(Testplanet);
 }
