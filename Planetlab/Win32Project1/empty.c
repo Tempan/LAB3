@@ -69,8 +69,6 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				ReadFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
 				if (strcmp(((struct pt*)temp)->name, ((struct pt*)buffer)->name))
 				{
-
-					//SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)buffer);
 					readFromFile((struct pt*)buffer);
 				}
 			} while (dwBytesRead != 0);
