@@ -4,12 +4,14 @@
 #include <math.h>
 #include "wrapper.h"
 
+/* the server uses a timer to periodically update the presentation window */
+/* here is the timer id and timer period defined                          */
+
 #define UPDATE_FREQ     1	/* update frequency (in ms) for the timer */
 #define G 6.67259e-11
 #define DT 10
 CRITICAL_SECTION Crit;
 LPTSTR Slot = TEXT("\\\\.\\mailslot\\sample_mailslot");
-/* (the server uses a mailslot for incoming client requests) */
 struct pt* root;
 void checkPlanets(struct pt* Testplanet);
 void createPlanet(char*, double, double, double, double, double, int);
@@ -18,8 +20,7 @@ void removePlanets(struct pt* planeten);
 
 LRESULT WINAPI MainWndProc( HWND, UINT, WPARAM, LPARAM );
 DWORD WINAPI mailThread(LPVOID);
-
-HDC hDC;	
+HDC hDC;
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow ) {
 	HWND hWnd;
@@ -27,34 +28,12 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 	MSG msg;
 	InitializeCriticalSection(&Crit);
 
-	/* Create the window, 3 last parameters important */
-	/* The tile of the window, the callback function */
-	/* and the backgrond color */
-
 	hWnd = windowCreate (hPrevInstance, hInstance, nCmdShow, "Himmel", MainWndProc, COLOR_WINDOW+1);
-
-	/* start the timer for the periodic update of the window    */
-	/* (this is a one-shot timer, which means that it has to be */
-	/* re-set after each time-out) */
-	/* NOTE: When this timer expires a message will be sent to  */
-	/*       our callback function (MainWndProc).               */
 
 	windowRefreshTimer (hWnd, UPDATE_FREQ);
 
-
-	/* create a thread that can handle incoming client requests */
-	/* (the thread starts executing in the function mailThread) */
-
-	/* NOTE: See online help for details, you need to know how  */ 
-	/*       this function does and what its parameters mean.   */
-	/* We have no parameters to pass, hence NULL				*/
-
-
 	threadID = threadCreate (mailThread, NULL); 
 
-
-	/* (the message processing loop that all windows applications must have) */
-	/* NOTE: just leave it as it is. */
 	while( GetMessage( &msg, NULL, 0, 0 ) ) 
 	{
 		TranslateMessage( &msg );
@@ -70,20 +49,12 @@ DWORD WINAPI mailThread(LPVOID arg)
 	DWORD bytesRead;
 	static int posY = 0;
 	HANDLE mailbox;
-	/* create a mailslot that clients can use to pass requests through   */
-	/* (the clients use the name below to get contact with the mailslot) */
-	/* NOTE: The name of a mailslot must start with "\\\\.\\mailslot\\"  */
-
+	
 	mailbox = mailslotCreate(Slot);
 
 
 	for(;;) 
-	{				
-		/* (ordinary file manipulating functions are used to read from mailslots) 
-		in this example the server receives strings from the client side and   
-		displays them in the presentation window                               
-		NOTE: binary data can also be sent and received, e.g. planet structures*/
-
+	{	
 		bytesRead = mailslotRead (mailbox, buffer, sizeof(buffer));
 
 		if(bytesRead!= 0) 
@@ -112,13 +83,10 @@ LRESULT CALLBACK MainWndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam 
 	static DWORD color = 0;
 
 	switch( msg ) {
-
 	case WM_CREATE:       
 		hDC = GetDC(hWnd);  
 		break;   
-
 	case WM_TIMER:
-
 		iterator = root;
 		EnterCriticalSection(&Crit);
 		while(iterator != NULL)
@@ -134,12 +102,10 @@ LRESULT CALLBACK MainWndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam 
 		context = BeginPaint( hWnd, &ps );
 		EndPaint( hWnd, &ps );
 		break;
-
 	case WM_DESTROY:
 		PostQuitMessage( 0 );
 		ReleaseDC(hWnd, hDC); /* Some housekeeping */
 		break;
-
 	default:
 		return( DefWindowProc( hWnd, msg, wParam, lParam )); 
 	}
@@ -149,7 +115,6 @@ LRESULT CALLBACK MainWndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam 
 void checkPlanets(struct pt *Testplanet)
 {
 	struct pt* iterator;
-	EnterCriticalSection(&Crit);
 	if(root == NULL)
 	{
 		root = Testplanet;
@@ -163,7 +128,6 @@ void checkPlanets(struct pt *Testplanet)
 		}
 		iterator->next = Testplanet;
 	}
-	LeaveCriticalSection(&Crit);
 	threadCreate((LPTHREAD_START_ROUTINE)updatePlanets, Testplanet);
 }
 
@@ -179,13 +143,13 @@ void* updatePlanets(void* planeten) // Ska uppdatera rutan och flytta planeterna
 	strcpy_s(slot, sizeof(slot), "\\\\.\\mailslot\\test");
 	strcat_s(slot,sizeof(slot),planet->pid);
 	Slot = slot;
+	iterator = root;
 	messages = mailslotConnect(Slot);
 	while(planet->life > 0) //För varje planet
 	{
 		EnterCriticalSection(&Crit);
 		totX=0;
 		totY=0;
-		iterator = root;
 		while (iterator != NULL )	//räkna mellan planeter
 		{
 			if(iterator != planet)
@@ -196,7 +160,7 @@ void* updatePlanets(void* planeten) // Ska uppdatera rutan och flytta planeterna
 				totY += a1 * ((iterator->sy - planet->sy) / r); 
 			}
 
-			iterator = iterator->next;
+			iterator = iterator->next; 
 		}
 		//räkna ut ny position
 		planet->vx = planet->vx + (totX * DT);				//vx_new
@@ -205,6 +169,7 @@ void* updatePlanets(void* planeten) // Ska uppdatera rutan och flytta planeterna
 		planet->vy = planet->vy + (totY * DT);				//vx_new
 		planet->sy = planet->sy + (planet->vy * DT);		//sx_new
 		LeaveCriticalSection(&Crit);
+
 		//döda om den är utanför
 		if(planet->sx < 0 || planet->sx > 800 || planet->sy < 0 || planet->sy > 600)
 		{
@@ -232,7 +197,7 @@ void removePlanets(struct pt* planeten)
 	struct pt* swapper;
 	EnterCriticalSection(&Crit);
 	iterator = root;
-	if(planet = root)
+	if(planet == root)
 	{
 		root = planet->next;
 	}
