@@ -60,7 +60,9 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			// Hitta selected DWSEL ÄR DWORD
 			selectedItem = SendDlgItemMessage(hDlg, list_localPlanets, LB_GETCURSEL, 0, 0);
 			// Göra buff till planetens namn
-			SendDlgItemMessage(hDlg, list_localPlanets, LB_GETTEXT, selectedItem, (LPARAM)(LPSTR)buffer);
+			
+			// DENNA BLIR FEL VÄRDE IBLAND?!
+			SendDlgItemMessage(hDlg, list_localPlanets, LB_GETTEXT, selectedItem, (LPARAM)(LPSTR)buffer); 
 			// Tabort från lokala listan.
 			iterator = root;
 			while(iterator != NULL)
@@ -276,7 +278,6 @@ void AddPlanetsToList(struct pt *Testplanet)
 		}
 		iterator->next = newplanet;
 	}
-	//SendMessage(GetDlgItem(dia2, list_localPlanets), LB_INSERTSTRING, NULL, (LPARAM)Testplanet);
 	SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)Testplanet->name);
 	amount++;
 	SetDlgItemInt(dia2,TXT_NrOfLocalPlanets, amount, FALSE);
@@ -291,12 +292,8 @@ void sendToServer(struct pt *planetToServer)
 	planetToSend = planetToServer;
 	mailSlot = mailslotConnect(Slot); 
 	Sleep(2000); // make sure mailslotConnect is done before starting the loop!!
+	planetToSend->next = NULL;
 	mailslotWrite (mailSlot, (void*)planetToSend, sizeof(struct pt));
-	/*while(planetToSend != NULL)
-	{
-		mailslotWrite (mailSlot, (void*)planetToSend, sizeof(struct pt));
-		planetToSend = planetToSend->next;
-	}*/
 }
 
 void readFromFile(struct pt* Testplanet)
