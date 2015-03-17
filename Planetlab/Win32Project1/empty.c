@@ -19,7 +19,6 @@ void AddPlanetsToList(struct pt *);
 void AddPlanets();
 void sendToServer();
 void readFromFile(struct pt*);
-void writeToFile();
 DWORD WINAPI threadRead( void* data );
 
 //Första dialogrutans funktioner... (DIALOG2)
@@ -28,8 +27,9 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
 	DWORD dwBytesRead;
 	planet_type loadplanets;
+	struct pt* iterator;
 	HANDLE mailSlot, file, wfile;
-	int count, i;
+	int count, i, test;
 	char buffer[sizeof(struct pt)];
 	char temp[sizeof(struct pt)];
 	mailSlot = mailslotConnect(Slot);
@@ -106,21 +106,29 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			/* Saving the Listbox Items to File */
            
 			wfile = OpenFileDialog("save", GENERIC_WRITE, CREATE_NEW);
-			/*if (wfile == INVALID_HANDLE_VALUE)
-				return GetLastError();*/
+			if (wfile == INVALID_HANDLE_VALUE)
+				return GetLastError();
 
 			count = SendDlgItemMessage(dia2, list_localPlanets,LB_GETCOUNT, NULL, NULL);
 			for (i = 0; i < count; i++)
 			{
-				if(SendDlgItemMessage(dia2, list_localPlanets,LB_GETSEL, i, NULL))
+				test = SendDlgItemMessage(dia2, list_localPlanets,LB_GETSEL, i, NULL);
+				if(test)
 				{
 					SendDlgItemMessage(dia2, list_localPlanets,LB_GETTEXT,(WPARAM) i, (LPARAM)buffer);
-					WriteFile(wfile, buffer, strlen(buffer)+1, (LPDWORD)&dwBytesRead, NULL);
+					iterator = root;
+					while(iterator != NULL)
+					{
+						if(!strcmp(buffer, iterator->name))
+						{
+							WriteFile(wfile, iterator, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
+						}
+						iterator = iterator->next;
+					}
+					
 				}
 			}
 
-
-			//WriteFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
 
 			CloseHandle(wfile);
 			break;
@@ -321,9 +329,4 @@ void readFromFile(struct pt* Testplanet)
 	Testplanet->next = NULL;
 	sprintf_s(Testplanet->pid,15, "%lu ", GetCurrentProcessId());
 	AddPlanetsToList(Testplanet);
-}
-
-void writeToFile()
-{
-
 }
