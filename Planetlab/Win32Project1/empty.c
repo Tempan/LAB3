@@ -285,7 +285,7 @@ void AddPlanetsToServerList(struct pt *Testplanet)
 		iterator->next = newplanet;
 	}
 	SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)Testplanet->name);
-	amount++;
+	amount--;
 	SetDlgItemInt(dia2,TXT_NrOfLocalPlanets, amount, FALSE);
 
 }
@@ -319,16 +319,16 @@ void AddPlanetsToLocalList(struct pt *Testplanet)
 void sendToServer(struct pt *planetToServer)
 {
 	HANDLE mailSlot;
-	struct pt* planetToSend = planetToServer;
+	struct pt planetToSend = *planetToServer;
 	struct pt* iterator = root;
 	mailSlot = mailslotConnect(Slot); 
-	planetToSend->next = NULL;
-	mailslotWrite (mailSlot, (void*)planetToSend, sizeof(struct pt));
-	SendDlgItemMessage(dia2, list_livingPlanets, LB_ADDSTRING, 0, (LPARAM)planetToSend->name);
+	planetToSend.next = NULL;
+	mailslotWrite (mailSlot, (void*)&planetToSend, sizeof(struct pt));
+	SendDlgItemMessage(dia2, list_livingPlanets, LB_ADDSTRING, 0, (LPARAM)planetToSend.name);
 	RemovePlanetFromLocalList(planetToServer);
 	//amount--;
 	//SetDlgItemInt(dia2,TXT_NrOfLocalPlanets, amount, FALSE);
-	AddPlanetsToServerList(planetToSend);
+	AddPlanetsToServerList(&planetToSend);
 	ClearListbox(list_localPlanets);
 	while(iterator != NULL)
 	{
@@ -409,7 +409,7 @@ void RemovePlanetFromServerList(struct pt* Testplanet)
 {
 	planet_type *tempo = serverRoot;
 	planet_type *swapper = NULL;
-	if(Testplanet = serverRoot)
+	if(Testplanet == serverRoot)
 	{
 		serverRoot = serverRoot->next;
 	}
@@ -417,17 +417,22 @@ void RemovePlanetFromServerList(struct pt* Testplanet)
 	{
 		while (tempo->next != NULL)
 		{
-			if(Testplanet == tempo->next)
+			if(!strcmp(Testplanet->name, tempo->next->name))//(Testplanet == tempo->next)
 			{
-				if(tempo->next != NULL)
+				if(tempo->next->next != NULL)
 				{
 					swapper = tempo->next->next;
 					free(tempo->next);
 					tempo->next = swapper;
+					break;
 				}
 				else 
+				{
 					tempo->next = NULL;
+					break;
+				}
 			}
+			tempo = tempo->next;
 		}
 	}
 }
@@ -436,7 +441,7 @@ void RemovePlanetFromLocalList(struct pt* Testplanet)
 {
 	planet_type *tempo = root;
 	planet_type *swapper = NULL;
-	if(Testplanet = root)
+	if(Testplanet == root)
 	{
 		root = root->next;
 	}
@@ -444,23 +449,25 @@ void RemovePlanetFromLocalList(struct pt* Testplanet)
 	{
 		while (tempo->next != NULL)
 		{
-			if(Testplanet == tempo->next)
+			if(!strcmp(Testplanet->name, tempo->next->name))//(Testplanet == tempo->next)
 			{
-				if(tempo->next != NULL)
+				if(tempo->next->next != NULL)
 				{
 					swapper = tempo->next->next;
 					free(tempo->next);
 					tempo->next = swapper;
+					break;
 				}
 				else 
+				{
 					tempo->next = NULL;
+					break;
+				}
 			}
+			tempo = tempo->next;
 		}
 	}
-	//SendDlgItemMessage(dia2, list_localPlanets, LB_DELETESTRING, 0, (LPARAM)Testplanet->name);
 }
-
-
 
 //Hör till remove from list_living planets
 void ClearListbox(int list)
