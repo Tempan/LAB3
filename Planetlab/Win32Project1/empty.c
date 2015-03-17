@@ -156,6 +156,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 	return 1;
 }
 
+//read everything from DIA1
 //Check if everything is correctly done so we can add the planet to the list
 void AddPlanets()
 {
