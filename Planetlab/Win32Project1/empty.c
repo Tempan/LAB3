@@ -59,12 +59,12 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//	//UpdateWindow(dia2);
 			break;
 		case btn_SendToServer:
-			iterator = root;						//SET iterator to root
-			for (i = 0; i < LB_GETCOUNT; i++)		//loop list
+			for (i = 0; i < SendDlgItemMessage(hDlg, list_localPlanets, LB_GETCOUNT, i, NULL); i++)		//loop list
 			{
 				if(SendDlgItemMessage(hDlg, list_localPlanets, LB_GETSEL, i, NULL))				//Get Selected values from list
 				{
 					SendDlgItemMessage(hDlg, list_localPlanets, LB_GETTEXT, i, (LPARAM)buffer);	//GET text from selected items
+					iterator = root;						//SET iterator to root
 					while(iterator != NULL)	
 					{
 						if(!strcmp(iterator->name, buffer))			//StringCompare if buffer = planets name
