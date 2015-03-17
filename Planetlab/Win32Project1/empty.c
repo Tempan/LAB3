@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <windows.h>
 #include "resource.h"
 #include <tchar.h>
@@ -321,6 +322,7 @@ DWORD WINAPI threadRead( void* data )
 	char id[20];
 	char nameFromServer[20];
 	char theMessage[200];
+	struct pt* iterator;
 	struct pt* it;
 	HANDLE mailSlot;
 	LPTSTR Slot; 
@@ -339,7 +341,7 @@ DWORD WINAPI threadRead( void* data )
 			SendMessage(GetDlgItem(dia2, list_history), LB_INSERTSTRING, NULL, (LPARAM)theMessage);
 
 			// Update planets in server root
-			planet_type *iterator = root;
+			iterator = root;
 
 			while (iterator != NULL)
 			{
@@ -353,7 +355,7 @@ DWORD WINAPI threadRead( void* data )
 
 					// Update listbox
 					ClearListbox(list_livingPlanets);
-					planet_type *it = root;
+					it = root;
 					while (it != NULL)
 					{
 						AddToListbox(list_livingPlanets, it->name);
