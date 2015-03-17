@@ -69,7 +69,6 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				{
 					sendToServer(iterator);
 				}
-				//LALLAAL
 				iterator = iterator->next;
 			}
 			break;
