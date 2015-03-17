@@ -261,7 +261,6 @@ void AddPlanets()
 	AddPlanetsToList(newplanet);
 }
 
-
 //Add planet to list linked to root
 void AddPlanetsToList(struct pt *Testplanet)
 {
