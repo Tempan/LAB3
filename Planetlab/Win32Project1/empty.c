@@ -9,7 +9,6 @@ HINSTANCE hInst;
 DWORD selectedItem;
 HWND dia1, dia2;
 char name[20];
-struct pt* iterator;
 struct pt* root;
 int amount = 0;
 int i = 0;
@@ -17,6 +16,7 @@ int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, le
 double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
 char buffer[sizeof(struct pt)];
 LPTSTR Slot = TEXT("\\\\.\\mailslot\\sample_mailslot");
+
 void AddPlanetsToList(struct pt *);
 void AddPlanets();
 void sendToServer();
@@ -33,6 +33,7 @@ DWORD WINAPI threadRead( void* data );
 INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
+	struct pt* iterator;
 	DWORD dwBytesRead;
 	planet_type loadplanets;
 	HANDLE mailSlot, file, wfile;
