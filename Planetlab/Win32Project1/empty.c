@@ -10,6 +10,7 @@ HWND dia1, dia2;
 char name[20];
 struct pt* iterator;
 int amount = 0;
+int i = 0;
 int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, lengthOfLife;
 double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
 struct pt* root;
@@ -24,6 +25,7 @@ DWORD WINAPI threadRead( void* data );
 //Första dialogrutans funktioner... (DIALOG2)
 INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
 	DWORD dwBytesRead;
 	planet_type loadplanets;
 	HANDLE mailSlot, file, wfile;
@@ -58,22 +60,25 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//	//UpdateWindow(dia2);
 			break;
 		case btn_SendToServer:
-			// Hitta selected DWSEL ÄR DWORD
-			selectedItem = SendDlgItemMessage(hDlg, list_localPlanets, LB_GETCURSEL, 0, 0);
-			// Göra buff till planetens namn
-			
-			// DENNA BLIR FEL VÄRDE IBLAND?!
-			SendDlgItemMessage(hDlg, list_localPlanets, LB_GETTEXT, selectedItem, (LPARAM)(LPSTR)buffer); 
-			// Tabort från lokala listan.
-			iterator = root;
-			while(iterator != NULL)
+			iterator = root;						//SET iterator to root
+			for (i = 0; i < LB_GETCOUNT; i++)		//loop list
 			{
-				if(!strcmp(iterator->name, buffer))
+				if(SendDlgItemMessage(hDlg, list_localPlanets, LB_GETSEL, i, NULL))				//Get Selected values from list
 				{
-					sendToServer(iterator);
+					SendDlgItemMessage(hDlg, list_localPlanets, LB_GETTEXT, i, (LPARAM)buffer);	//GET text from selected items
+					while(iterator != NULL)	
+					{
+						if(!strcmp(iterator->name, buffer))			//StringCompare if buffer = planets name
+						{
+							memcpy(newplanet, iterator, sizeof(struct pt));
+							sendToServer(newplanet);					//send to server
+						}
+						iterator = iterator->next;
+					}
 				}
-				iterator = iterator->next;
+
 			}
+
 			break;
 		case btn_openFromFile:
 
