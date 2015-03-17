@@ -26,7 +26,8 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	DWORD dwBytesRead;
 	planet_type loadplanets;
-	HANDLE mailSlot, file;
+	HANDLE mailSlot, file, wfile;
+	int count, i;
 	char buffer[sizeof(struct pt)];
 	char temp[sizeof(struct pt)];
 	mailSlot = mailslotConnect(Slot);
@@ -96,15 +97,29 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 
 		case btn_SaveInFile:
-			file = OpenFileDialog("save", GENERIC_WRITE, OPEN_EXISTING);
-			if (file == INVALID_HANDLE_VALUE)
-				return GetLastError();
 
-			//ta data från listan och lägg i buffer??
-			WriteFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
+			/* Saving the Listbox Items to File */
+           
+			wfile = OpenFileDialog("save", GENERIC_WRITE, CREATE_NEW);
+			/*if (wfile == INVALID_HANDLE_VALUE)
+				return GetLastError();*/
 
-			CloseHandle(file);
+			count = SendDlgItemMessage(dia2, list_localPlanets,LB_GETCOUNT, NULL, NULL);
+			for (i = 0; i < count; i++)
+			{
+				if(SendDlgItemMessage(dia2, list_localPlanets,LB_GETSEL, i, NULL))
+				{
+					SendDlgItemMessage(dia2, list_localPlanets,LB_GETTEXT,(WPARAM) i, (LPARAM)buffer);
+					WriteFile(wfile, buffer, strlen(buffer)+1, (LPDWORD)&dwBytesRead, NULL);
+				}
+			}
+
+
+			//WriteFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
+
+			CloseHandle(wfile);
 			break;
+		
 		}
 		break;
 
