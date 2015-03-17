@@ -83,7 +83,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if (file == INVALID_HANDLE_VALUE)
 				return GetLastError();
 
-			LB_GETSELITEMS(LB_GETSELCOUNT(0,0), buffer);
+			//LB_GETSELITEMS(LB_GETSELCOUNT(0,0), buffer);
 
 			//ta data från listan och lägg i buffer??
 			WriteFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
