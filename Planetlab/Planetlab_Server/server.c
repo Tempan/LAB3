@@ -88,13 +88,13 @@ LRESULT CALLBACK MainWndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam 
 		break;   
 	case WM_TIMER:
 		iterator = root;
-		EnterCriticalSection(&Crit);
+		//EnterCriticalSection(&Crit);
 		while(iterator != NULL)
 		{
 			SetPixel (hDC, iterator->sx, iterator->sy, (COLORREF) color);
 			iterator = iterator->next;
 		}
-		LeaveCriticalSection(&Crit);
+		//LeaveCriticalSection(&Crit);
 		windowRefreshTimer (hWnd, UPDATE_FREQ);
 		break;
 

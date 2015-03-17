@@ -5,8 +5,10 @@
 #include "wrapper.h"
 
 HINSTANCE hInst;
+DWORD selectedItem;
 HWND dia1, dia2;
 char name[20];
+struct pt* iterator;
 int amount = 0;
 int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, lengthOfLife;
 double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
@@ -55,7 +57,20 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//	//UpdateWindow(dia2);
 			break;
 		case btn_SendToServer:
-			sendToServer();
+			// Hitta selected DWSEL ÄR DWORD
+			selectedItem = SendDlgItemMessage(hDlg, list_localPlanets, LB_GETCURSEL, 0, 0);
+			// Göra buff till planetens namn
+			SendDlgItemMessage(hDlg, list_localPlanets, LB_GETTEXT, selectedItem, (LPARAM)(LPSTR)buffer);
+			// Tabort från lokala listan.
+			iterator = root;
+			while(iterator != NULL)
+			{
+				if(!strcmp(iterator->name, buffer))
+				{
+					sendToServer(iterator);
+				}
+				iterator = iterator->next;
+			}
 			break;
 		case btn_openFromFile:
 
@@ -82,8 +97,6 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			file = OpenFileDialog("save", GENERIC_WRITE, OPEN_EXISTING);
 			if (file == INVALID_HANDLE_VALUE)
 				return GetLastError();
-
-			//LB_GETSELITEMS(LB_GETSELCOUNT(0,0), buffer);
 
 			//ta data från listan och lägg i buffer??
 			WriteFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
@@ -249,7 +262,7 @@ void AddPlanetsToList(struct pt *Testplanet)
 {
 	struct pt * newplanet= (struct pt*)malloc(sizeof(struct pt));
 	memcpy(newplanet, Testplanet, sizeof(struct pt));
-	
+
 	if(root == NULL)
 	{
 		root = newplanet;
@@ -271,18 +284,19 @@ void AddPlanetsToList(struct pt *Testplanet)
 }
 
 //Sent all the planets to the server
-void sendToServer()
+void sendToServer(struct pt *planetToServer)
 {
 	HANDLE mailSlot;
 	struct pt* planetToSend;
-	planetToSend = root;
+	planetToSend = planetToServer;
 	mailSlot = mailslotConnect(Slot); 
 	Sleep(2000); // make sure mailslotConnect is done before starting the loop!!
-	while(planetToSend != NULL)
+	mailslotWrite (mailSlot, (void*)planetToSend, sizeof(struct pt));
+	/*while(planetToSend != NULL)
 	{
 		mailslotWrite (mailSlot, (void*)planetToSend, sizeof(struct pt));
 		planetToSend = planetToSend->next;
-	}
+	}*/
 }
 
 void readFromFile(struct pt* Testplanet)
