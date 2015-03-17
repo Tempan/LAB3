@@ -5,8 +5,10 @@
 #include "wrapper.h"
 
 HINSTANCE hInst;
+DWORD selectedItem;
 HWND dia1, dia2;
 char name[20];
+struct pt* iterator;
 int amount = 0;
 int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, lengthOfLife;
 double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
@@ -25,16 +27,13 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	DWORD dwBytesRead;
 	planet_type loadplanets;
 	HANDLE mailSlot, file;
-	int count, i;
 	char buffer[sizeof(struct pt)];
 	char temp[sizeof(struct pt)];
 	mailSlot = mailslotConnect(Slot);
-	
 
 	switch(uMsg)
 	{
 	case WM_COMMAND:
-	{
 		switch(LOWORD(wParam))
 		{
 		case btn_exit:
@@ -58,13 +57,29 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//	//UpdateWindow(dia2);
 			break;
 		case btn_SendToServer:
-			sendToServer();
+			// Hitta selected DWSEL ÄR DWORD
+			selectedItem = SendDlgItemMessage(hDlg, list_localPlanets, LB_GETCURSEL, 0, 0);
+			// Göra buff till planetens namn
+			
+			// DENNA BLIR FEL VÄRDE IBLAND?!
+			SendDlgItemMessage(hDlg, list_localPlanets, LB_GETTEXT, selectedItem, (LPARAM)(LPSTR)buffer); 
+			// Tabort från lokala listan.
+			iterator = root;
+			while(iterator != NULL)
+			{
+				if(!strcmp(iterator->name, buffer))
+				{
+					sendToServer(iterator);
+				}
+				iterator = iterator->next;
+			}
 			break;
 		case btn_openFromFile:
 
 			file = OpenFileDialog("load", GENERIC_READ, OPEN_EXISTING);
 			if (file == INVALID_HANDLE_VALUE)
 				return GetLastError();
+
 			do
 			{
 				memcpy(temp, buffer, sizeof(struct pt));
@@ -81,67 +96,18 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 
 		case btn_SaveInFile:
-
-			/* Saving the Listbox Items to File */
-           
-			file = OpenFileDialog("save", GENERIC_WRITE, CREATE_NEW);
+			file = OpenFileDialog("save", GENERIC_WRITE, OPEN_EXISTING);
 			if (file == INVALID_HANDLE_VALUE)
 				return GetLastError();
 
-			count = SendDlgItemMessage(dia2, list_localPlanets,LB_GETCOUNT, NULL, NULL);
-			for (i = 0; i < count; i++)
-			{
-				if(SendDlgItemMessage(dia2, list_localPlanets,LB_GETSEL, i, NULL))
-				{
-					SendDlgItemMessage(dia2, list_localPlanets,LB_GETTEXT,(WPARAM) i, (LPARAM)buffer);
-					WriteFile(file, buffer, strlen(buffer)+1, (LPDWORD)&dwBytesRead, NULL);
-				}
-			}
-
-
-			/*int count = SendDlgItemMessage( dia2, list_localPlanets, LB_GETSELCOUNT, 0, 0L); 
-			int * sel_rows = new int[count]; 
-			int res = SendDlgItemMessage(dia2, list_livingPlanets, LB_GETSELITEMS,count, PARAM)sel_rows); 
-*/
-			//LB_GETSELITEMS(LB_GETSELCOUNT(0,0), buffer);
-
 			//ta data från listan och lägg i buffer??
-			
-			//WriteFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
+			WriteFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
 
 			CloseHandle(file);
 			break;
 		}
 		break;
 
-
-		case list_localPlanets:
-		{
-			case LBN_SELCHANGE:
-				{
-					//HWND hwndList = GetDlgItem(dia2, list_localPlanets); 
-
-					//// Get selected index.
-					//int lbItem = (int)SendMessage(hwndList, LB_GETCURSEL, 0, 0); 
-
-					//// Get item data.
-					//int i = (int)SendMessage(hwndList, LB_GETITEMDATA, lbItem, 0);
-
-					//WriteFile(file, buffer, sizeof(struct pt), (LPDWORD)&i, NULL);
-
-													//// Do something with the data from Roster[i]
-													//TCHAR buff[MAX_PATH];
-													//StringCbPrintf (buff, ARRAYSIZE(buff),  
-													//	TEXT("Position: %s\nGames played: %d\nGoals: %d"), 
-													//	Roster[i].achPosition, Roster[i].nGamesPlayed, 
-													//	Roster[i].nGoalsScored);
-
-													//SetDlgItemText(hDlg, IDC_STATISTICS, buff); 
-					return TRUE; 
-				} 
-		}
-         return TRUE;
-	}
 	case WM_CLOSE:
 		CloseWindow(hDlg);
 		return TRUE;
@@ -153,9 +119,6 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	return FALSE;
 }
-
-
-
 
 //Andra dialogrutans funktioner... (DIALOG1)
 INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -301,7 +264,7 @@ void AddPlanetsToList(struct pt *Testplanet)
 {
 	struct pt * newplanet= (struct pt*)malloc(sizeof(struct pt));
 	memcpy(newplanet, Testplanet, sizeof(struct pt));
-	
+
 	if(root == NULL)
 	{
 		root = newplanet;
@@ -315,7 +278,6 @@ void AddPlanetsToList(struct pt *Testplanet)
 		}
 		iterator->next = newplanet;
 	}
-	//SendMessage(GetDlgItem(dia2, list_localPlanets), LB_INSERTSTRING, NULL, (LPARAM)Testplanet);
 	SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)Testplanet->name);
 	amount++;
 	SetDlgItemInt(dia2,TXT_NrOfLocalPlanets, amount, FALSE);
@@ -323,18 +285,15 @@ void AddPlanetsToList(struct pt *Testplanet)
 }
 
 //Sent all the planets to the server
-void sendToServer()
+void sendToServer(struct pt *planetToServer)
 {
 	HANDLE mailSlot;
 	struct pt* planetToSend;
-	planetToSend = root;
+	planetToSend = planetToServer;
 	mailSlot = mailslotConnect(Slot); 
 	Sleep(2000); // make sure mailslotConnect is done before starting the loop!!
-	while(planetToSend != NULL)
-	{
-		mailslotWrite (mailSlot, (void*)planetToSend, sizeof(struct pt));
-		planetToSend = planetToSend->next;
-	}
+	planetToSend->next = NULL;
+	mailslotWrite (mailSlot, (void*)planetToSend, sizeof(struct pt));
 }
 
 void readFromFile(struct pt* Testplanet)
