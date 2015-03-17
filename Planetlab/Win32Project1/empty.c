@@ -25,13 +25,16 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	DWORD dwBytesRead;
 	planet_type loadplanets;
 	HANDLE mailSlot, file;
+	int count, i;
 	char buffer[sizeof(struct pt)];
 	char temp[sizeof(struct pt)];
 	mailSlot = mailslotConnect(Slot);
+	
 
 	switch(uMsg)
 	{
 	case WM_COMMAND:
+	{
 		switch(LOWORD(wParam))
 		{
 		case btn_exit:
@@ -62,7 +65,6 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			file = OpenFileDialog("load", GENERIC_READ, OPEN_EXISTING);
 			if (file == INVALID_HANDLE_VALUE)
 				return GetLastError();
-
 			do
 			{
 				memcpy(temp, buffer, sizeof(struct pt));
@@ -79,20 +81,67 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 
 		case btn_SaveInFile:
-			file = OpenFileDialog("save", GENERIC_WRITE, OPEN_EXISTING);
+
+			/* Saving the Listbox Items to File */
+           
+			file = OpenFileDialog("save", GENERIC_WRITE, CREATE_NEW);
 			if (file == INVALID_HANDLE_VALUE)
 				return GetLastError();
 
+			count = SendDlgItemMessage(dia2, list_localPlanets,LB_GETCOUNT, NULL, NULL);
+			for (i = 0; i < count; i++)
+			{
+				if(SendDlgItemMessage(dia2, list_localPlanets,LB_GETSEL, i, NULL))
+				{
+					SendDlgItemMessage(dia2, list_localPlanets,LB_GETTEXT,(WPARAM) i, (LPARAM)buffer);
+					WriteFile(file, buffer, strlen(buffer)+1, (LPDWORD)&dwBytesRead, NULL);
+				}
+			}
+
+
+			/*int count = SendDlgItemMessage( dia2, list_localPlanets, LB_GETSELCOUNT, 0, 0L); 
+			int * sel_rows = new int[count]; 
+			int res = SendDlgItemMessage(dia2, list_livingPlanets, LB_GETSELITEMS,count, PARAM)sel_rows); 
+*/
 			//LB_GETSELITEMS(LB_GETSELCOUNT(0,0), buffer);
 
 			//ta data från listan och lägg i buffer??
-			WriteFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
+			
+			//WriteFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
 
 			CloseHandle(file);
 			break;
 		}
 		break;
 
+
+		case list_localPlanets:
+		{
+			case LBN_SELCHANGE:
+				{
+					//HWND hwndList = GetDlgItem(dia2, list_localPlanets); 
+
+					//// Get selected index.
+					//int lbItem = (int)SendMessage(hwndList, LB_GETCURSEL, 0, 0); 
+
+					//// Get item data.
+					//int i = (int)SendMessage(hwndList, LB_GETITEMDATA, lbItem, 0);
+
+					//WriteFile(file, buffer, sizeof(struct pt), (LPDWORD)&i, NULL);
+
+													//// Do something with the data from Roster[i]
+													//TCHAR buff[MAX_PATH];
+													//StringCbPrintf (buff, ARRAYSIZE(buff),  
+													//	TEXT("Position: %s\nGames played: %d\nGoals: %d"), 
+													//	Roster[i].achPosition, Roster[i].nGamesPlayed, 
+													//	Roster[i].nGoalsScored);
+
+													//SetDlgItemText(hDlg, IDC_STATISTICS, buff); 
+					return TRUE; 
+				} 
+		}
+         return TRUE;
+	}
 	case WM_CLOSE:
 		CloseWindow(hDlg);
 		return TRUE;
@@ -104,6 +153,9 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	return FALSE;
 }
+
+
+
 
 //Andra dialogrutans funktioner... (DIALOG1)
 INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
