@@ -10,6 +10,7 @@ DWORD selectedItem;
 HWND dia1, dia2;
 char name[20];
 struct pt* root;
+struct pt* serverRoot;
 int amount = 0;
 int i = 0;
 int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, lengthOfLife;
@@ -17,14 +18,16 @@ double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
 char buffer[sizeof(struct pt)];
 LPTSTR Slot = TEXT("\\\\.\\mailslot\\sample_mailslot");
 
-void AddPlanetsToList(struct pt *);
+void AddPlanetsToLocalList(struct pt *);
 void AddPlanets();
 void sendToServer();
 void readFromFile(struct pt*);
 void writeToFile();
+void RemovePlanetFromLocalList(struct pt* Testplanet);
 void RemovePlanetFromServerList(struct pt* Testplanet);
 void ClearListbox(int list);
 void AddToListbox(int list, char* message);
+void AddPlanetsToServerList(struct pt *Testplanet);
 
 
 DWORD WINAPI threadRead( void* data );
@@ -260,11 +263,35 @@ void AddPlanets()
 	newplanet->next = NULL;
 	sprintf_s(newplanet->pid,15, "%lu", GetCurrentProcessId());
 
-	AddPlanetsToList(newplanet);
+	AddPlanetsToLocalList(newplanet);
+}
+
+void AddPlanetsToServerList(struct pt *Testplanet)
+{
+	struct pt * newplanet= (struct pt*)malloc(sizeof(struct pt));
+	memcpy(newplanet, Testplanet, sizeof(struct pt));
+
+	if(serverRoot == NULL)
+	{
+		serverRoot = newplanet;
+	}
+	else
+	{
+		struct pt* iterator = serverRoot;
+		while(iterator->next != NULL)
+		{
+			iterator = iterator->next;
+		}
+		iterator->next = newplanet;
+	}
+	SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)Testplanet->name);
+	amount--;
+	SetDlgItemInt(dia2,TXT_NrOfLocalPlanets, amount, FALSE);
+
 }
 
 //Add planet to list linked to root
-void AddPlanetsToList(struct pt *Testplanet)
+void AddPlanetsToLocalList(struct pt *Testplanet)
 {
 	struct pt * newplanet= (struct pt*)malloc(sizeof(struct pt));
 	memcpy(newplanet, Testplanet, sizeof(struct pt));
@@ -292,30 +319,33 @@ void AddPlanetsToList(struct pt *Testplanet)
 void sendToServer(struct pt *planetToServer)
 {
 	HANDLE mailSlot;
-	struct pt* planetToSend;
-	planetToSend = planetToServer;
+	struct pt planetToSend = *planetToServer;
+	struct pt* iterator = root;
 	mailSlot = mailslotConnect(Slot); 
-	Sleep(2000); // make sure mailslotConnect is done before starting the loop!!
-	planetToSend->next = NULL;
-	mailslotWrite (mailSlot, (void*)planetToSend, sizeof(struct pt));
-	SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)planetToSend->name);
+	planetToSend.next = NULL;
+	mailslotWrite (mailSlot, (void*)&planetToSend, sizeof(struct pt));
+	SendDlgItemMessage(dia2, list_livingPlanets, LB_ADDSTRING, 0, (LPARAM)planetToSend.name);
+	RemovePlanetFromLocalList(planetToServer);
+	ClearListbox(list_localPlanets);
+	AddPlanetsToServerList(&planetToSend);
+	while(iterator != NULL)
+	{
+		AddToListbox(list_localPlanets, iterator->name);
+		iterator = iterator->next;
+	}
 }
 
 void readFromFile(struct pt* Testplanet)
 {
 	Testplanet->next = NULL;
 	sprintf_s(Testplanet->pid,15, "%lu ", GetCurrentProcessId());
-	AddPlanetsToList(Testplanet);
+	AddPlanetsToLocalList(Testplanet);
 }
 
 void writeToFile()
 {
 
 }
-
-
-
-
 
 // read if planet is dead
 DWORD WINAPI threadRead( void* data )
@@ -342,7 +372,7 @@ DWORD WINAPI threadRead( void* data )
 			SendMessage(GetDlgItem(dia2, list_history), LB_INSERTSTRING, NULL, (LPARAM)theMessage);
 
 			// Update planets in server root
-			iterator = root;
+			iterator = serverRoot;
 
 			while (iterator != NULL)
 			{
@@ -356,7 +386,7 @@ DWORD WINAPI threadRead( void* data )
 
 					// Update listbox
 					ClearListbox(list_livingPlanets);
-					it = root;
+					it = serverRoot;
 					while (it != NULL)
 					{
 						AddToListbox(list_livingPlanets, it->name);
@@ -375,9 +405,41 @@ DWORD WINAPI threadRead( void* data )
 //Hör till remove from list_living planets
 void RemovePlanetFromServerList(struct pt* Testplanet)
 {
+	planet_type *tempo = serverRoot;
+	planet_type *swapper = NULL;
+	if(Testplanet == serverRoot)
+	{
+		serverRoot = serverRoot->next;
+	}
+	else
+	{
+		while (tempo->next != NULL)
+		{
+			if(!strcmp(Testplanet->name, tempo->next->name))//(Testplanet == tempo->next)
+			{
+				if(tempo->next->next != NULL)
+				{
+					swapper = tempo->next->next;
+					free(tempo->next);
+					tempo->next = swapper;
+					break;
+				}
+				else 
+				{
+					tempo->next = NULL;
+					break;
+				}
+			}
+			tempo = tempo->next;
+		}
+	}
+}
+
+void RemovePlanetFromLocalList(struct pt* Testplanet)
+{
 	planet_type *tempo = root;
 	planet_type *swapper = NULL;
-	if(Testplanet = root)
+	if(Testplanet == root)
 	{
 		root = root->next;
 	}
@@ -385,17 +447,22 @@ void RemovePlanetFromServerList(struct pt* Testplanet)
 	{
 		while (tempo->next != NULL)
 		{
-			if(Testplanet == tempo->next)
+			if(!strcmp(Testplanet->name, tempo->next->name))//(Testplanet == tempo->next)
 			{
-				if(tempo->next != NULL)
+				if(tempo->next->next != NULL)
 				{
 					swapper = tempo->next->next;
 					free(tempo->next);
 					tempo->next = swapper;
+					break;
 				}
 				else 
+				{
 					tempo->next = NULL;
+					break;
+				}
 			}
+			tempo = tempo->next;
 		}
 	}
 }
