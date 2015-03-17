@@ -9,17 +9,23 @@ DWORD selectedItem;
 HWND dia1, dia2;
 char name[20];
 struct pt* iterator;
+struct pt* root;
 int amount = 0;
 int i = 0;
 int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, lengthOfLife;
 double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
-struct pt* root;
+char buffer[sizeof(struct pt)];
 LPTSTR Slot = TEXT("\\\\.\\mailslot\\sample_mailslot");
 void AddPlanetsToList(struct pt *);
 void AddPlanets();
 void sendToServer();
 void readFromFile(struct pt*);
 void writeToFile();
+void RemovePlanetFromServerList(struct pt* Testplanet);
+void ClearListbox(int list);
+void AddToListbox(int list, char* message);
+
+
 DWORD WINAPI threadRead( void* data );
 
 //Första dialogrutans funktioner... (DIALOG2)
@@ -30,7 +36,6 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	planet_type loadplanets;
 	HANDLE mailSlot, file, wfile;
 	int count, i;
-	char buffer[sizeof(struct pt)];
 	char temp[sizeof(struct pt)];
 	mailSlot = mailslotConnect(Slot);
 
@@ -104,10 +109,10 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case btn_SaveInFile:
 
 			/* Saving the Listbox Items to File */
-           
+
 			wfile = OpenFileDialog("save", GENERIC_WRITE, CREATE_NEW);
 			/*if (wfile == INVALID_HANDLE_VALUE)
-				return GetLastError();*/
+			return GetLastError();*/
 
 			count = SendDlgItemMessage(dia2, list_localPlanets,LB_GETCOUNT, NULL, NULL);
 			for (i = 0; i < count; i++)
@@ -124,7 +129,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			CloseHandle(wfile);
 			break;
-		
+
 		}
 		break;
 
@@ -256,28 +261,6 @@ void AddPlanets()
 	AddPlanetsToList(newplanet);
 }
 
-// read if planet is dead
-DWORD WINAPI threadRead( void* data )
-{
-	char id[20];
-	char theMessage[200];
-	HANDLE mailSlot;
-	LPTSTR Slot; 
-	char slot[40];
-	strcpy_s(slot, sizeof(slot), "\\\\.\\mailslot\\test");
-	sprintf_s(id,sizeof(id), "%d", data);
-	strcat_s(slot,sizeof(slot),id);
-	Slot = slot;
-	mailSlot = mailslotCreate(Slot);
-	Sleep(2000);		// make sure mailslotConnect is done before starting the loop!!
-	while (1)
-	{
-		int bytesread = mailslotRead(mailSlot, theMessage, 424);
-		if (bytesread > 0)
-			SendMessage(GetDlgItem(dia2, list_history), LB_INSERTSTRING, NULL, (LPARAM)theMessage);
-	}
-	mailslotClose (mailSlot);
-}
 
 //Add planet to list linked to root
 void AddPlanetsToList(struct pt *Testplanet)
@@ -326,4 +309,104 @@ void readFromFile(struct pt* Testplanet)
 void writeToFile()
 {
 
+}
+
+
+
+
+
+// read if planet is dead
+DWORD WINAPI threadRead( void* data )
+{
+	char id[20];
+	char nameFromServer[20];
+	char theMessage[200];
+	struct pt* it;
+	HANDLE mailSlot;
+	LPTSTR Slot; 
+	char slot[40];
+	strcpy_s(slot, sizeof(slot), "\\\\.\\mailslot\\test");
+	sprintf_s(id,sizeof(id), "%d", data);
+	strcat_s(slot,sizeof(slot),id);
+	Slot = slot;
+	mailSlot = mailslotCreate(Slot);
+	Sleep(2000);		// make sure mailslotConnect is done before starting the loop!!
+	while (1)
+	{
+		int bytesread = mailslotRead(mailSlot, theMessage, 424);
+		if (bytesread > 0)
+		{
+			SendMessage(GetDlgItem(dia2, list_history), LB_INSERTSTRING, NULL, (LPARAM)theMessage);
+
+			// Update planets in server root
+			planet_type *iterator = root;
+
+			while (iterator != NULL)
+			{
+				int planetNameLength = strlen(iterator->name);
+				strncpy(nameFromServer, buffer, planetNameLength);
+				nameFromServer[planetNameLength] = '\0';
+
+				if (strcmp(nameFromServer, iterator->name) == 0)
+				{
+					RemovePlanetFromServerList(iterator);
+
+					// Update listbox
+					ClearListbox(list_livingPlanets);
+					planet_type *it = root;
+					while (it != NULL)
+					{
+						AddToListbox(list_livingPlanets, it->name);
+						it = it->next;
+					}
+					break;
+
+				}
+				iterator = iterator->next;
+			}
+		}
+	}
+	mailslotClose (mailSlot);
+}
+
+//Hör till remove from list_living planets
+void RemovePlanetFromServerList(struct pt* Testplanet)
+{
+	planet_type *tempo = root;
+	planet_type *swapper = NULL;
+	if(Testplanet = root)
+	{
+		root = root->next;
+	}
+	else
+	{
+		while (tempo->next != NULL)
+		{
+			if(Testplanet == tempo->next)
+			{
+				if(tempo->next != NULL)
+				{
+					swapper = tempo->next->next;
+					free(tempo->next);
+					tempo->next = swapper;
+				}
+				else 
+					tempo->next = NULL;
+			}
+		}
+	}
+}
+
+//Hör till remove from list_living planets
+void ClearListbox(int list)
+{
+	HWND handleClearList = GetDlgItem(dia2, list);
+	SendMessage(handleClearList, LB_RESETCONTENT, NULL, NULL);
+}
+
+//Hör till remove from list_living planets
+void AddToListbox(int list, char* message)
+{
+	HWND handleAddToList = GetDlgItem(dia2, list);
+	SendMessage(handleAddToList, LB_ADDSTRING, NULL, (LPARAM)message);
 }
