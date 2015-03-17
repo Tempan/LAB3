@@ -326,10 +326,8 @@ void sendToServer(struct pt *planetToServer)
 	mailslotWrite (mailSlot, (void*)&planetToSend, sizeof(struct pt));
 	SendDlgItemMessage(dia2, list_livingPlanets, LB_ADDSTRING, 0, (LPARAM)planetToSend.name);
 	RemovePlanetFromLocalList(planetToServer);
-	//amount--;
-	//SetDlgItemInt(dia2,TXT_NrOfLocalPlanets, amount, FALSE);
-	AddPlanetsToServerList(&planetToSend);
 	ClearListbox(list_localPlanets);
+	AddPlanetsToServerList(&planetToSend);
 	while(iterator != NULL)
 	{
 		AddToListbox(list_localPlanets, iterator->name);
