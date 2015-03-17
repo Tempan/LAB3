@@ -296,6 +296,7 @@ void sendToServer(struct pt *planetToServer)
 	Sleep(2000); // make sure mailslotConnect is done before starting the loop!!
 	planetToSend->next = NULL;
 	mailslotWrite (mailSlot, (void*)planetToSend, sizeof(struct pt));
+	SendDlgItemMessage(dia2, list_localPlanets, LB_ADDSTRING, 0, (LPARAM)planetToSend->name);
 }
 
 void readFromFile(struct pt* Testplanet)
