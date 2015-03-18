@@ -11,9 +11,8 @@ HWND dia1, dia2;
 char name[20];
 struct pt* root;
 struct pt* serverRoot;
-int amount = 0;
-int i = 0;
-int test;
+int amount = 0, i = 0;
+int loopLength, loopLength2 = 0;
 int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, lengthOfLife;
 double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
 char buffer[sizeof(struct pt)];
@@ -29,15 +28,14 @@ void RemovePlanetFromServerList(struct pt* Testplanet);
 void ClearListbox(int list);
 void AddToListbox(int list, char* message);
 void AddPlanetsToServerList(struct pt *Testplanet);
-
-
 DWORD WINAPI threadRead( void* data );
 
 //Första dialogrutans funktioner... (DIALOG2)
 INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	struct pt *newplanet = (struct pt*)malloc(sizeof(struct pt));
+	//struct pt* newplanet = (struct pt*)malloc(sizeof(struct pt));
 	struct pt* iterator;
+	struct pt* newplanet;
 	DWORD dwBytesRead;
 	planet_type loadplanets;
 	HANDLE mailSlot, file, wfile;
@@ -71,9 +69,9 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//	//UpdateWindow(dia2);
 			break;
 		case btn_SendToServer:
-
-			test = SendDlgItemMessage(hDlg, list_localPlanets, LB_GETCOUNT, NULL, NULL);
-			for (i = 0; i < test; i++)		//loop list
+			newplanet = NULL;
+			loopLength = SendDlgItemMessage(hDlg, list_localPlanets, LB_GETCOUNT, NULL, NULL);
+			for (i = 0; i < loopLength; i++)		//loop list
 			{
 				if(SendDlgItemMessage(hDlg, list_localPlanets, LB_GETSEL, i, NULL))				//Get Selected values from list
 				{
@@ -84,13 +82,24 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					{
 						if(!strcmp(iterator->name, buffer))			//StringCompare if buffer = planets name
 						{
-							memcpy(newplanet, iterator, sizeof(struct pt));
-							sendToServer(newplanet);					//send to server
+							if(newplanet == NULL)
+								memcpy(newplanet, iterator, sizeof(struct pt));
+							else
+								memcpy(newplanet->next, iterator, sizeof(struct pt));
+							buffer[0] = 0;
+							loopLength2 ++;
+							break;
 						}
-						iterator = iterator->next;
+						else
+							iterator = iterator->next;
 					}
 				}
-
+			}
+			i = 0;
+			for (i = 0; i < loopLength2; i++)
+			{
+				sendToServer(newplanet);	//send to server
+				newplanet = newplanet->next;
 			}
 
 			break;
@@ -480,7 +489,6 @@ DWORD WINAPI threadRead( void* data )
 	}
 	mailslotClose (mailSlot);
 }
-
 
 //Hör till remove from list_living planets
 void ClearListbox(int list)
