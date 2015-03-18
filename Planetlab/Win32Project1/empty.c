@@ -115,28 +115,14 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 
 
-		case btn_SaveInFile:
+		case btn_SaveInFile: // Saving the Listbox Items to File 
 
-			/* Saving the Listbox Items to File */
+			file = OpenFileDialog("save", GENERIC_WRITE, CREATE_NEW);
+			if (file == INVALID_HANDLE_VALUE)
+				return GetLastError();
 
-			wfile = OpenFileDialog("save", GENERIC_WRITE, CREATE_NEW);
-			/*if (wfile == INVALID_HANDLE_VALUE)
-			return GetLastError();*/
-
-			count = SendDlgItemMessage(dia2, list_localPlanets,LB_GETCOUNT, NULL, NULL);
-			for (i = 0; i < count; i++)
-			{
-				if(SendDlgItemMessage(dia2, list_localPlanets,LB_GETSEL, i, NULL))
-				{
-					SendDlgItemMessage(dia2, list_localPlanets,LB_GETTEXT,(WPARAM) i, (LPARAM)buffer);
-					WriteFile(wfile, buffer, strlen(buffer)+1, (LPDWORD)&dwBytesRead, NULL);
-				}
-			}
-
-
-			//WriteFile(file, buffer, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
-
-			CloseHandle(wfile);
+			writeToFile(file);
+			CloseHandle(file);
 			break;
 
 		}
@@ -170,6 +156,7 @@ INT_PTR CALLBACK DialogProc1(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		case btn_addPlanet:
 			AddPlanets();
+			CloseWindow(hDlg);
 			break;
 		}
 		break;
@@ -347,9 +334,31 @@ void readFromFile(struct pt* Testplanet)
 	AddPlanetsToLocalList(Testplanet);
 }
 
-void writeToFile()
+void writeToFile(HANDLE wfile)
 {
+	struct pt* iterator;
+	DWORD dwBytesRead;
+	int count, i, test;
 
+	count = SendDlgItemMessage(dia2, list_localPlanets,LB_GETCOUNT, NULL, NULL);
+	for (i = 0; i < count; i++)
+	{
+		test = SendDlgItemMessage(dia2, list_localPlanets,LB_GETSEL, i, NULL);
+		if(test)
+		{
+			SendDlgItemMessage(dia2, list_localPlanets,LB_GETTEXT,(WPARAM) i, (LPARAM)buffer);
+			iterator = root;
+			while(iterator != NULL)
+			{
+				if(!strcmp(buffer, iterator->name))
+{
+					WriteFile(wfile, iterator, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
+				}
+				iterator = iterator->next;
+			}
+
+}
+	}
 }
 
 // read if planet is dead
