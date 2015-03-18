@@ -306,6 +306,71 @@ void AddPlanetsToLocalList(struct pt *Testplanet)
 
 }
 
+//Hör till remove from list_living planets
+void RemovePlanetFromServerList(struct pt* Testplanet)
+{
+	planet_type *tempo = serverRoot;
+	planet_type *swapper = NULL;
+	if(Testplanet == serverRoot)
+	{
+		serverRoot = serverRoot->next;
+	}
+	else
+	{
+		while (tempo->next != NULL)
+		{
+			if(!strcmp(Testplanet->name, tempo->next->name))//(Testplanet == tempo->next)
+			{
+				if(tempo->next->next != NULL)
+				{
+					swapper = tempo->next->next;
+					free(tempo->next);
+					tempo->next = swapper;
+					break;
+				}
+				else 
+				{
+					tempo->next = NULL;
+					break;
+				}
+			}
+			tempo = tempo->next;
+		}
+	}
+}
+
+void RemovePlanetFromLocalList(struct pt* Testplanet)
+{
+	planet_type *tempo = root;
+	planet_type *swapper = NULL;
+	if(!strcmp(Testplanet->name, root->name))
+	{
+		root = root->next;
+	}
+	else
+	{
+		while (tempo->next != NULL)
+		{
+			if(!strcmp(Testplanet->name, tempo->next->name))//(Testplanet == tempo->next)
+			{
+				if(tempo->next->next != NULL)
+				{
+					swapper = tempo->next->next;
+					free(tempo->next);
+					tempo->next = swapper;
+					break;
+				}
+				else 
+				{
+					tempo->next = NULL;
+					break;
+				}
+			}
+			tempo = tempo->next;
+		}
+	}
+}
+
 //Sent all the planets to the server
 void sendToServer(struct pt *planetToServer)
 {
@@ -416,70 +481,6 @@ DWORD WINAPI threadRead( void* data )
 	mailslotClose (mailSlot);
 }
 
-//Hör till remove from list_living planets
-void RemovePlanetFromServerList(struct pt* Testplanet)
-{
-	planet_type *tempo = serverRoot;
-	planet_type *swapper = NULL;
-	if(Testplanet == serverRoot)
-	{
-		serverRoot = serverRoot->next;
-	}
-	else
-	{
-		while (tempo->next != NULL)
-		{
-			if(!strcmp(Testplanet->name, tempo->next->name))//(Testplanet == tempo->next)
-			{
-				if(tempo->next->next != NULL)
-				{
-					swapper = tempo->next->next;
-					free(tempo->next);
-					tempo->next = swapper;
-					break;
-				}
-				else 
-				{
-					tempo->next = NULL;
-					break;
-				}
-			}
-			tempo = tempo->next;
-		}
-	}
-}
-
-void RemovePlanetFromLocalList(struct pt* Testplanet)
-{
-	planet_type *tempo = root;
-	planet_type *swapper = NULL;
-	if(!strcmp(Testplanet->name, root->name))
-	{
-		root = root->next;
-	}
-	else
-	{
-		while (tempo->next != NULL)
-		{
-			if(!strcmp(Testplanet->name, tempo->next->name))//(Testplanet == tempo->next)
-			{
-				if(tempo->next->next != NULL)
-				{
-					swapper = tempo->next->next;
-					free(tempo->next);
-					tempo->next = swapper;
-					break;
-				}
-				else 
-				{
-					tempo->next = NULL;
-					break;
-				}
-			}
-			tempo = tempo->next;
-		}
-	}
-}
 
 //Hör till remove from list_living planets
 void ClearListbox(int list)
