@@ -74,6 +74,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 		case btn_SendToServer:
 			loopLength = SendDlgItemMessage(hDlg, list_localPlanets, LB_GETCOUNT, NULL, NULL);
+			rootToSend = NULL;
 			for (i = 0; i < loopLength; i++)		//loop list
 			{
 				if(SendDlgItemMessage(hDlg, list_localPlanets, LB_GETSEL, i, NULL))				//Get Selected values from list
@@ -119,6 +120,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					sendToServer(current);	//send to server
 				current = current->next;
 			}
+			loopLength2 = 0;
 
 			break;
 		case btn_openFromFile:
@@ -274,8 +276,8 @@ void AddPlanets()
 	strcpy_s(newplanet->name, sizeof(newplanet->name), name);
 	newplanet->sx = _sx;										
 	newplanet->sy = _sy;											
-	newplanet->vx = _vy;											
-	newplanet->vy = _vx;											
+	newplanet->vx = _vx;											
+	newplanet->vy = _vy;											
 	newplanet->mass = _mass;											
 	newplanet->life = _life;
 	newplanet->next = NULL;
@@ -464,6 +466,7 @@ DWORD WINAPI threadRead( void* data )
 	HANDLE mailSlot;
 	LPTSTR Slot; 
 	char slot[40];
+	//char bufferio[20];
 	strcpy_s(slot, sizeof(slot), "\\\\.\\mailslot\\test");
 	sprintf_s(id,sizeof(id), "%d", data);
 	strcat_s(slot,sizeof(slot),id);
@@ -483,7 +486,7 @@ DWORD WINAPI threadRead( void* data )
 			while (iterator != NULL)
 			{
 				int planetNameLength = strlen(iterator->name);
-				strncpy(nameFromServer, buffer, planetNameLength);
+				strncpy(nameFromServer, theMessage, planetNameLength);
 				nameFromServer[planetNameLength] = '\0';
 
 				if (strcmp(nameFromServer, iterator->name) == 0)
