@@ -79,7 +79,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				if(SendDlgItemMessage(hDlg, list_localPlanets, LB_GETSEL, i, NULL))				//Get Selected values from list
 				{
 					//byter aldrig buffern....
-					SendDlgItemMessage(hDlg, list_localPlanets, LB_GETTEXT, i, (LPARAM)buffer);	//GET text from selected items
+					SendDlgItemMessage(hDlg, list_localPlanets, LB_GETTEXT, (WPARAM)i, (LPARAM)buffer);	//GET text from selected items
 					iterator = root;						//SET iterator to root
 					while(iterator != NULL)	
 					{
