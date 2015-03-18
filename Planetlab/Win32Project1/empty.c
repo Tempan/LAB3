@@ -13,6 +13,7 @@ struct pt* root;
 struct pt* serverRoot;
 int amount = 0;
 int i = 0;
+int test;
 int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, lengthOfLife;
 double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
 char buffer[sizeof(struct pt)];
@@ -40,7 +41,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	DWORD dwBytesRead;
 	planet_type loadplanets;
 	HANDLE mailSlot, file, wfile;
-	int count, i;
+	int count, i, test;
 	char temp[sizeof(struct pt)];
 	mailSlot = mailslotConnect(Slot);
 
@@ -70,10 +71,13 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//	//UpdateWindow(dia2);
 			break;
 		case btn_SendToServer:
-			for (i = 0; i < SendDlgItemMessage(hDlg, list_localPlanets, LB_GETCOUNT, i, NULL); i++)		//loop list
+			
+			test = SendDlgItemMessage(hDlg, list_localPlanets, LB_GETCOUNT, NULL, NULL);
+			for (i = 0; i < test; i++)		//loop list
 			{
 				if(SendDlgItemMessage(hDlg, list_localPlanets, LB_GETSEL, i, NULL))				//Get Selected values from list
 				{
+					//byter aldrig buffern....
 					SendDlgItemMessage(hDlg, list_localPlanets, LB_GETTEXT, i, (LPARAM)buffer);	//GET text from selected items
 					iterator = root;						//SET iterator to root
 					while(iterator != NULL)	
@@ -325,9 +329,10 @@ void sendToServer(struct pt *planetToServer)
 	planetToSend.next = NULL;
 	mailslotWrite (mailSlot, (void*)&planetToSend, sizeof(struct pt));
 	SendDlgItemMessage(dia2, list_livingPlanets, LB_ADDSTRING, 0, (LPARAM)planetToSend.name);
+	AddPlanetsToServerList(&planetToSend);
 	RemovePlanetFromLocalList(planetToServer);
 	ClearListbox(list_localPlanets);
-	AddPlanetsToServerList(&planetToSend);
+	iterator = root;
 	while(iterator != NULL)
 	{
 		AddToListbox(list_localPlanets, iterator->name);
@@ -439,7 +444,7 @@ void RemovePlanetFromLocalList(struct pt* Testplanet)
 {
 	planet_type *tempo = root;
 	planet_type *swapper = NULL;
-	if(Testplanet == root)
+	if(!strcmp(Testplanet->name, root->name))
 	{
 		root = root->next;
 	}
