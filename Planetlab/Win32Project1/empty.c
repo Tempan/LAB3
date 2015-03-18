@@ -464,6 +464,7 @@ DWORD WINAPI threadRead( void* data )
 	HANDLE mailSlot;
 	LPTSTR Slot; 
 	char slot[40];
+	//char bufferio[20];
 	strcpy_s(slot, sizeof(slot), "\\\\.\\mailslot\\test");
 	sprintf_s(id,sizeof(id), "%d", data);
 	strcat_s(slot,sizeof(slot),id);
@@ -483,7 +484,7 @@ DWORD WINAPI threadRead( void* data )
 			while (iterator != NULL)
 			{
 				int planetNameLength = strlen(iterator->name);
-				strncpy(nameFromServer, buffer, planetNameLength);
+				strncpy(nameFromServer, theMessage, planetNameLength);
 				nameFromServer[planetNameLength] = '\0';
 
 				if (strcmp(nameFromServer, iterator->name) == 0)
