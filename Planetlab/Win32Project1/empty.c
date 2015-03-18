@@ -13,8 +13,8 @@ HWND dia1, dia2;
 char name[20];
 struct pt* root;
 struct pt* serverRoot;
-int amount = 0, i = 0;
-int loopLength, loopLength2 = 0;
+struct pt* rootToSend;
+int amount = 0, i = 0, loopLength, loopLength2 = 0;
 int LengthOfName, LengthOfX, LengthOfY, LengthOfVX, LengthOfVY, LengthOfMass, lengthOfLife;
 double _sx = 0, _sy = 0, _vx = 0, _vy = 0, _mass = 0, _life = 0;
 char buffer[sizeof(struct pt)];
@@ -37,7 +37,9 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	//struct pt* newplanet = (struct pt*)malloc(sizeof(struct pt));
 	struct pt* iterator;
-	struct pt* newplanet;
+	struct pt* current;
+
+	//struct pt* newplanet;
 	DWORD dwBytesRead;
 	planet_type loadplanets;
 	HANDLE mailSlot, file, wfile;
@@ -71,7 +73,6 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//	//UpdateWindow(dia2);
 			break;
 		case btn_SendToServer:
-			newplanet = NULL;
 			loopLength = SendDlgItemMessage(hDlg, list_localPlanets, LB_GETCOUNT, NULL, NULL);
 			for (i = 0; i < loopLength; i++)		//loop list
 			{
@@ -84,10 +85,23 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					{
 						if(!strcmp(iterator->name, buffer))			//StringCompare if buffer = planets name
 						{
-							if(newplanet == NULL)
-								memcpy(newplanet, iterator, sizeof(struct pt));
+							if(rootToSend == NULL)
+							{
+								rootToSend = (struct pt*)malloc(sizeof(struct pt));
+								memcpy(rootToSend, iterator, sizeof(struct pt));
+								rootToSend->next = NULL;
+							}
 							else
-								memcpy(newplanet->next, iterator, sizeof(struct pt));
+							{
+								current = rootToSend;
+								while(current->next != NULL)
+								{
+									current = current->next;
+								}
+								current->next = (struct pt*)malloc(sizeof(struct pt));
+								memcpy(current->next, iterator, sizeof(struct pt));
+								current->next->next = NULL;
+							}
 							buffer[0] = 0;
 							loopLength2 ++;
 							break;
@@ -98,10 +112,12 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				}
 			}
 			i = 0;
+			current = rootToSend;
 			for (i = 0; i < loopLength2; i++)
 			{
-				sendToServer(newplanet);	//send to server
-				newplanet = newplanet->next;
+				if(current != NULL)
+					sendToServer(current);	//send to server
+				current = current->next;
 			}
 
 			break;
