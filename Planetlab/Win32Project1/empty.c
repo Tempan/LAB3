@@ -71,7 +71,7 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//	//UpdateWindow(dia2);
 			break;
 		case btn_SendToServer:
-			
+
 			test = SendDlgItemMessage(hDlg, list_localPlanets, LB_GETCOUNT, NULL, NULL);
 			for (i = 0; i < test; i++)		//loop list
 			{
@@ -351,13 +351,13 @@ void writeToFile(HANDLE wfile)
 			while(iterator != NULL)
 			{
 				if(!strcmp(buffer, iterator->name))
-{
+				{
 					WriteFile(wfile, iterator, sizeof(struct pt), (LPDWORD)&dwBytesRead, NULL);
 				}
 				iterator = iterator->next;
 			}
 
-}
+		}
 	}
 }
 
