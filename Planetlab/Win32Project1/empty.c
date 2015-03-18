@@ -1,5 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <windows.h>
+#include <math.h>
+#include <stdlib.h>
 #include "resource.h"
 #include <tchar.h>
 #include <stdio.h>
