@@ -55,23 +55,13 @@ INT_PTR CALLBACK DialogProc2(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case btn_exit:
 			CloseWindow(dia1);
 			CloseWindow(dia2);
+			PostQuitMessage(0);
 			return TRUE;
 
 		case btn_createPlanet:
 			ShowWindow(dia1, 1);
 			break;
 
-		case btn_start:
-
-			//SendDlgItemMessage(dia2, list_history, LB_GETSELITEMS, 0, (LPARAM)Testplanet);
-			//	//setWindowText();
-			//	LPCSTR nrplanets;
-			//	int nrofplanets = 0;
-			//	nrplanets = (LPCSTR) nrofplanets;
-			//	//SetWindowText(dia2, "HEJJJJJJJJ!!!!");
-			//	SetDlgItemText(dia2,TXT_NrOfLocalPlanets, nrofplanets);
-			//	//UpdateWindow(dia2);
-			break;
 		case btn_SendToServer:
 			loopLength = SendDlgItemMessage(hDlg, list_localPlanets, LB_GETCOUNT, NULL, NULL);
 			rootToSend = NULL;

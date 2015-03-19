@@ -150,7 +150,7 @@ DWORD WINAPI mailThread(LPVOID arg)
 			/* NOTE: It is appropriate to replace this code with something that match your needs here.*/
 			posY++;  
 			/* (hDC is used reference the previously created window) */							
-			TextOut(hDC, 10, 50+posY%200, buffer, bytesRead);
+			//TextOut(hDC, 10, 50+posY%200, buffer, bytesRead);
 		}
 	}
 
