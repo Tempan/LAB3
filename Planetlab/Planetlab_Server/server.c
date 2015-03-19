@@ -26,49 +26,19 @@
 #include <math.h>
 #include "wrapper.h"
 
-/* the server uses a timer to periodically update the presentation window */
-/* here is the timer id and timer period defined                          */
-
-#define UPDATE_FREQ     1	/* update frequency (in ms) for the timer */
+#define UPDATE_FREQ     1
 #define G 6.67259e-11
 #define DT 10
 CRITICAL_SECTION Crit;
 LPTSTR Slot = TEXT("\\\\.\\mailslot\\sample_mailslot");
-/* (the server uses a mailslot for incoming client requests) */
 struct pt* root;
 void checkPlanets(struct pt* Testplanet);
 void createPlanet(char*, double, double, double, double, double, int);
 void* updatePlanets(void* planeten);
 void removePlanets(struct pt* planeten);
-
-/*********************  Prototypes  ***************************/
-/* NOTE: Windows has defined its own set of types. When the   */
-/*       types are of importance to you we will write comments*/ 
-/*       to indicate that. (Ignore them for now.)             */
-/**************************************************************/
-
 LRESULT WINAPI MainWndProc( HWND, UINT, WPARAM, LPARAM );
 DWORD WINAPI mailThread(LPVOID);
-
-
-
-HDC hDC;		/* Handle to Device Context, gets set 1st time in MainWndProc */
-/* we need it to access the window for printing and drawin */
-
-/********************************************************************\
-*  Function: int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)    *
-*                                                                    *
-*   Purpose: Initializes Application                                 *
-*                                                                    *
-*  Comments: Register window class, create and display the main      *
-*            window, and enter message loop.                         *
-*                                                                    *
-*                                                                    *
-\********************************************************************/
-
-/* NOTE: This function is not too important to you, it only */
-/*       initializes a bunch of things.                     */
-/* NOTE: In windows WinMain is the start function, not main */
+HDC hDC;
 
 int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow ) {
 	HWND hWnd;
@@ -112,13 +82,6 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 
 	return msg.wParam;
 }
-
-
-/********************************************************************\
-* Function: mailThread                                               *
-* Purpose: Handle incoming requests from clients                     *
-* NOTE: This function is important to you.                           *
-/********************************************************************/
 DWORD WINAPI mailThread(LPVOID arg) 
 {
 	char buffer[1024];
@@ -156,7 +119,6 @@ DWORD WINAPI mailThread(LPVOID arg)
 
 	return 0;
 }
-
 LRESULT CALLBACK MainWndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam ) {
 
 	struct pt* iterator;
@@ -249,7 +211,6 @@ void checkPlanets(struct pt *Testplanet)
 	}
 	threadCreate((LPTHREAD_START_ROUTINE)updatePlanets, Testplanet);
 }
-
 void* updatePlanets(void* planeten) // Ska uppdatera rutan och flytta planeternas pixlar
 {
 	double r, a1, totX, totY;
